@@ -1,0 +1,5 @@
+*DS_Store*
+*.drawio
+*plotting.ipynb
+*.csv
+*.ipynb_checkpoints*
