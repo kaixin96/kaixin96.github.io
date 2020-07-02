@@ -14,6 +14,8 @@
     <link rel="stylesheet" type="text/css" href="../../stylesheet.css">
     <link rel="icon" type="image/png" href="diamond.png">
 
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
     <!-- Mathjax -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -88,7 +90,19 @@
                                         please refer to the <a href="https://github.com/kaixin96/MineRL_submission">source code</a>.
                                         The training curve is shown below.
                                     </p>
-                                    <iframe src='./treechop_plot.html' width=90% height=400 scrolling="no" frameBorder="0"></iframe>
+                                    <div id="treechop-plot"></div>
+                                    <script>
+                                        // From: https://www.w3schools.com/js/js_json_parse.asp
+                                        var xmlhttp = new XMLHttpRequest();
+                                        xmlhttp.onreadystatechange = function () {
+                                            if (this.readyState == 4 && this.status == 200) {
+                                                var plotly_vars = JSON.parse(this.responseText);
+                                                Plotly.newPlot('treechop-plot', plotly_vars['data'], plotly_vars['layout'], plotly_vars['config']);
+                                            }
+                                        };
+                                        xmlhttp.open("GET", "treechop_plot.json", true);
+                                        xmlhttp.send();
+                                    </script>
                                     <heading>Meta-controller</heading>
                                     <p>
                                         Once the treechop agent is trained, we fix it and view it as an option.
@@ -135,7 +149,19 @@
                                     <p>
                                         The meta-controller is implemented as an MLP and trained using PPO too. The training curves are shown below.
                                     </p>
-                                    <iframe src='./meta_controller_plot.html' width=90% height=500 scrolling="no" frameBorder="0"></iframe>
+                                    <div id="meta_controller-plot"></div>
+                                    <script>
+                                        // From: https://www.w3schools.com/js/js_json_parse.asp
+                                        var xmlhttp = new XMLHttpRequest();
+                                        xmlhttp.onreadystatechange = function () {
+                                            if (this.readyState == 4 && this.status == 200) {
+                                                var plotly_vars = JSON.parse(this.responseText);
+                                                Plotly.newPlot('meta_controller-plot', plotly_vars['data'], plotly_vars['layout'], plotly_vars['config']);
+                                            }
+                                        };
+                                        xmlhttp.open("GET", "meta_controller_plot.json", true);
+                                        xmlhttp.send();
+                                    </script>
                                     <heading>Our team</heading>
                                     <ul>
                                         <li>
