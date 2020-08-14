@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://kit.fontawesome.com/d4f46cb594.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="academicons-1.8.6/css/academicons.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&display=swap" rel="stylesheet">
+
+    <title>Fun RL Paper Collection</title>
+
+    <meta name="author" content="Wang Kaixin">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- Mathjax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    <table
+        style="width:100%;max-width:850px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+        <tbody>
+            <tr style="padding:0px">
+                <td style="padding:0px">
+                    <p style="float:right"><a href="index.html"><i class="fa fa-home"></i> Home</a></p>
+                    
+                    <h1 style="font-family: 'Titillium Web', sans-serif">
+                        Fun RL Paper Collection
+                    </h1>
+                    <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <p style="font-family: 'Titillium Web', sans-serif; font-weight:200;">
+                                        After one year into RL, I still occasionally feel "Why something has not been studied in RL? It is so
+                                        intuitive". Usually, it turns out that prior works are there, just not easy to find. They study
+                                        interesting questions (that a newcomer would ask) and are fun to read. But they are often omitted in
+                                        various online RL tutorials. So I create this page to collect these RL papers I have read.
+                                        Hope one of them can give you inspirations :)
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:25%;vertical-align:middle" onmouseout="prior_stop()" onmouseover="prior_start()">
+                                    <div class="one">
+                                        <div class="two" id='prior_image'>
+                                            <img src='images/featured/random2.gif' width="160" height="auto"></div>
+                                        <img src='images/featured/main.gif' width="160" height="auto">
+                                    </div>
+                                    <script type="text/javascript">
+                                        function prior_start() {
+                                            document.getElementById('prior_image').style.opacity = "1";
+                                        }
+
+                                        function prior_stop() {
+                                            document.getElementById('prior_image').style.opacity = "0";
+                                        }
+                                        prior_stop()
+                                    </script>
+                                </td>
+                                <td style="padding:0px;width:75%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://rach0012.github.io/humanRL_website/" target="_blank" rel="noopener noreferrer">
+                                        Investigating Human Priors for Playing Video Games
+                                    </a>
+                                    <br>
+                                    <span style="color:#D7D7D7;">
+                                        Rachit Dubey, Pulkit Agrawal, Deepak Pathak, Thomas L. Griffiths, Alexei A. Efros
+                                    </span>
+                                    <br>
+                                    <em style="color:#E4E4E4;">ICML 2018</em>
+                                    <br>
+                                        This game placed us in the shoes of reinforcement learning (RL) agents that start off
+                                        without the immense prior knowledge that humans possess.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
