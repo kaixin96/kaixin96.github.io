@@ -144,3 +144,22 @@ iframe {
     display:block;
     margin: auto;
 }
+
+.tippy-box[data-theme~='portal'] {
+    background-color: #FDFFF5FA;
+    color: #696969FF;
+    border: 1px solid #CCCCCCFF;
+  }
+
+  .tippy-box[data-theme~='portal'][data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: #FDFFF5FA;
+  }
+  .tippy-box[data-theme~='portal'][data-placement^='bottom'] > .tippy-arrow::before {
+    border-bottom-color: #FDFFF5FA;
+  }
+  .tippy-box[data-theme~='portal'][data-placement^='left'] > .tippy-arrow::before {
+    border-left-color: #FDFFF5FA;
+  }
+  .tippy-box[data-theme~='portal'][data-placement^='right'] > .tippy-arrow::before {
+    border-right-color: #FDFFF5FA;
+  }
