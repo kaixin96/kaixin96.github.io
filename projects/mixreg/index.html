@@ -5,7 +5,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
     <link rel="stylesheet" href="academicons-1.8.6/css/academicons.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&display=swap"
+        rel="stylesheet">
 
     <title>Improving Generalization in Reinforcement Learning with Mixture Regularization</title>
 
@@ -23,10 +25,10 @@
 
 <style>
     hr.gradient {
-    border: 0;
-    height: 1px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
-}
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    }
 </style>
 
 <body style="padding-bottom: 30pt;">
@@ -38,7 +40,8 @@
                     <h1 style="font-family: 'Titillium Web', sans-serif">
                         Improving Generalization in Reinforcement Learning with Mixture Regularization
                     </h1>
-                    <table style="width:80%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;font-family: 'Titillium Web', sans-serif">
+                    <table
+                        style="width:80%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;font-family: 'Titillium Web', sans-serif">
                         <tbody>
                             <tr>
                                 <td style="padding:0px;width:25%;text-align:center">
@@ -71,7 +74,8 @@
                         </tbody>
                     </table>
 
-                    <table style="width:20%;border:0px;padding-top:25px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;font-family: 'Titillium Web', sans-serif">
+                    <table
+                        style="width:20%;border:0px;padding-top:25px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;font-family: 'Titillium Web', sans-serif">
                         <tbody>
                             <tr>
                                 <td style="padding:0px;width:40%;text-align:center">
@@ -91,7 +95,8 @@
                     <p style="font-family: 'Titillium Web', sans-serif;padding: 0 90px 0 90px">
                         Deep reinforcement learning (RL) agents trained in a limited set of environments tend to
                         suffer overfitting and fail to generalize to unseen testing environments.
-                        To improve their generalizability, data augmentation approaches (e.g. cutout and random convolution)
+                        To improve their generalizability, data augmentation approaches (e.g. cutout and random
+                        convolution)
                         are previously explored to increase the data diversity. However, we find these approaches only
                         locally perturb the observations regardless of the training environments, showing limited
                         effectiveness on enhancing the data diversity and the generalization performance.
@@ -101,7 +106,8 @@
                         Mixreg increases the data diversity more effectively and helps learn smoother policies.
                         We verify its effectiveness on improving generalization by conducting extensive experiments
                         on the large-scale Procgen benchmark. Results show mixreg outperforms the well-established
-                        baselines on unseen testing environments by a large margin. Mixreg is simple, effective and general.
+                        baselines on unseen testing environments by a large margin. Mixreg is simple, effective and
+                        general.
                         It can be applied to both policy-based and value-based RL algorithms.
                     </p>
 
@@ -111,7 +117,8 @@
                         Increase training diversity
                     </h2>
 
-                    <img src="fig1.png" alt="compare previous data augs and mixreg", width="50%", style="display: block;margin-right:auto;margin-left:auto">
+                    <img src="fig1.png" alt="compare previous data augs and mixreg" , width="50%" ,
+                        style="display: block;margin-right:auto;margin-left:auto">
 
                     <p style="font-family: 'Titillium Web', sans-serif;padding: 0 90px 0 90px">
                         Previous data augmentation techniques (e.g. cutout) only apply local perturbations
@@ -125,7 +132,8 @@
                         three randomly selected observations from the testing environments.
                     </p>
 
-                    <img src="fig2.png" alt="learned value function", width="60%", style="display: block;margin-right:auto;margin-left:auto">
+                    <img src="fig2.png" alt="learned value function" , width="60%" ,
+                        style="display: block;margin-right:auto;margin-left:auto">
 
                     <hr class="gradient">
 
@@ -133,7 +141,8 @@
                         Results
                     </h2>
 
-                    <table style="width:100%;border:0px;padding-top:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;font-family: 'Titillium Web', sans-serif">
+                    <table
+                        style="width:100%;border:0px;padding-top:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;font-family: 'Titillium Web', sans-serif">
                         <tbody>
                             <tr>
                                 <td style="padding:0px;width:50%;text-align:center">
@@ -163,6 +172,38 @@
                                             }
                                         };
                                         xmlhttp.open("GET", "varying_levels.json", true);
+                                        xmlhttp.send();
+                                    </script>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:0px;width:50%;text-align:center">
+                                    <div id="varying_sizes_plot"></div>
+                                    <script>
+                                        // From: https://www.w3schools.com/js/js_json_parse.asp
+                                        var xmlhttp = new XMLHttpRequest();
+                                        xmlhttp.onreadystatechange = function () {
+                                            if (this.readyState == 4 && this.status == 200) {
+                                                var plotly_vars = JSON.parse(this.responseText);
+                                                Plotly.newPlot('varying_sizes_plot', plotly_vars['data'], plotly_vars['layout'], plotly_vars['config']);
+                                            }
+                                        };
+                                        xmlhttp.open("GET", "./varying_sizes_norm.json", true);
+                                        xmlhttp.send();
+                                    </script>
+                                </td>
+                                <td style="padding:0px;width:50%;text-align:center">
+                                    <div id="rainbow_plot"></div>
+                                    <script>
+                                        // From: https://www.w3schools.com/js/js_json_parse.asp
+                                        var xmlhttp = new XMLHttpRequest();
+                                        xmlhttp.onreadystatechange = function () {
+                                            if (this.readyState == 4 && this.status == 200) {
+                                                var plotly_vars = JSON.parse(this.responseText);
+                                                Plotly.newPlot('rainbow_plot', plotly_vars['data'], plotly_vars['layout'], plotly_vars['config']);
+                                            }
+                                        };
+                                        xmlhttp.open("GET", "./rainbow_norm.json", true);
                                         xmlhttp.send();
                                     </script>
                                 </td>
