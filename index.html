@@ -1,0 +1,387 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
+
+    <title>Kaixin's site</title>
+
+    <meta name="author" content="Wang Kaixin">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <link rel="icon" type="image/png" href="images/portal.png">
+</head>
+
+<script>
+    function showSelectedWorks() {
+        var btn = document.getElementById("showSelected");
+        var other_btn = document.getElementById("showAll");
+        btn.style.fontWeight = "500";
+        other_btn.style.fontWeight = "300";
+        var works = document.getElementsByClassName("other works");
+        for (var i = 0, max = works.length; i < max; i++) {
+            works[i].style.display = "none";
+        }
+    }
+    function showAllWorks() {
+        var btn = document.getElementById("showAll");
+        var other_btn = document.getElementById("showSelected");
+        btn.style.fontWeight = "500";
+        other_btn.style.fontWeight = "300";
+        var works = document.getElementsByClassName("other works");
+        for (var i = 0, max = works.length; i < max; i++) {
+            works[i].style.display = "block";
+        }
+    }
+</script>
+
+<style>
+    .headingButton {
+        border: none;
+        background-color: transparent;
+        font-family: 'Titillium Web', sans-serif;
+        font-size: 20px;
+        font-weight: 300;
+    }
+</style>
+
+<body>
+    <table
+        style="width:100%;max-width:850px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+        <tbody>
+            <tr style="padding:0px">
+                <td style="padding:0px">
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr style="padding:0px">
+                                <td style="padding:2.5%;width:63%;vertical-align:middle">
+                                    <p style="text-align:center">
+                                        <name>Wang Kaixin</name>
+                                    </p>
+                                    <p> I am a postdoctoral researcher in
+                                        <a href="https://rlrl.net.technion.ac.il/shie-mannor/">Prof. Shie Mannor</a>'s group at Technion.
+                                        Previously, I finished my PhD study in
+                                        <a href="https://ids.nus.edu.sg/index.html">Institute of Data Science</a>
+                                        at National University of Singapore,
+                                        fortunately supervised by
+                                        <a href="https://bhooi.github.io/">Prof. Bryan Hooi</a>,
+                                        <a href="https://sites.google.com/site/jshfeng/home">Dr. Jiashi Feng</a> and
+                                        <a href="https://sites.google.com/site/sitexinchaowang/">Prof. Xinchao Wang</a>.
+                                        Even earlier, I spent my undergraduate years at Nanjing University.
+                                    </p>
+                                    <p>
+                                        I am broadly interested in topics in (deep) reinforcement learning,
+                                        such as state/action representation, exploration and generalization.
+                                        I particularly enjoy doing research that answers an interesting question
+                                        or resolves an open issue. Feel free to contact me for discussion
+                                        or collaboration!
+                                    </p>
+                                    <p style="text-align:center">
+                                        <a href="mailto:kaixin.wang@u.nus.edu">
+                                            <span class="iconify" data-icon="ic:outline-email"
+                                                data-inline="true"></span>
+                                        </a>
+                                        &nbsp;/&nbsp;
+                                        <a href="cv.html">CV</a>
+                                        &nbsp;/&nbsp;
+                                        <a href="https://github.com/kaixin96">
+                                            <span class="iconify" data-icon="eva:github-outline"
+                                                data-inline="true"></span>
+                                        </a>
+                                        &nbsp;/&nbsp;
+                                        <a href="https://scholar.google.com/citations?user=AP_Yd6wAAAAJ">
+                                            <span class="iconify" data-icon="majesticons:academic-cap-line"
+                                                data-inline="true"></span>
+                                        </a>
+                                    </p>
+                                </td>
+                                <td style="padding:2.5%;width:40%;max-width:40%">
+                                    <img style="width:80%;max-width:80%" alt="profile photo" src="images/avatar.jpg"
+                                        class="hoverZoomLink">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <heading>News</heading>
+                                    <ul>
+                                        <li>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table> -->
+                    <!-- <br> -->
+
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <heading>
+                                        Selected Research Works
+                                    </heading>
+                                    <a href="papers.html">(Full List)</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+
+                            <tr>
+                                <td style="padding:20px;width:75%;vertical-align:middle">
+                                    <a href="https://proceedings.mlr.press/v202/wang23av.html" target="_blank">
+                                        <papertitle>
+                                            Reachability-Aware Laplacian Representation in Reinforcement Learning
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <b>Kaixin Wang*</b>, Kuangqi Zhou*, Jiashi Feng, Bryan Hooi, Xinchao Wang
+                                    <br>
+                                    <em>ICML</em>, 2023
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2210.13153" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:20px;width:75%;vertical-align:middle">
+                                    <a href="https://proceedings.mlr.press/v162/wang22k.html" target="_blank">
+                                        <papertitle>
+                                            The Geometry of Robust Value Functions
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <b>Kaixin Wang</b>, Navdeep Kumar, Kuangqi Zhou, Bryan Hooi, Jiashi Feng,
+                                    Shie Mannor
+                                    <br>
+                                    <em>ICML</em>, 2022
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2201.12929" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://slideslive.com/38983474/the-geometry-of-robust-value-functions" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:20px;width:75%;vertical-align:middle">
+                                    <a href="http://proceedings.mlr.press/v139/wang21ae.html" target="_blank">
+                                        <papertitle>Towards Better Laplacian Representation in Reinforcement Learning
+                                            with
+                                            Generalized Graph Drawing
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <b>Kaixin Wang*</b>, Kuangqi Zhou*, Qixin Zhang, Jie Shao, Bryan Hooi,
+                                    Jiashi Feng
+                                    <br>
+                                    <em>ICML</em>, 2021
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2107.05545" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code (coming soon)
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://slideslive.com/38958947" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                    <!-- <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <heading>Projects</heading>
+                            <tr>
+                                <td style="padding:0px;width:30%;vertical-align:middle">
+                                    <p style="text-align:center">
+                                        <img src='projects/minerl-2019/featured.gif' width="140">
+                                        <br>
+                                        <a href="projects/minerl-2019/index.html">MineRL competition 2019</a>
+                                    </p>
+                                </td>
+                                <td style="padding:0px;width:30%;vertical-align:middle"></td>
+                                <td style="padding:0px;width:30%;vertical-align:middle"></td>
+                            </tr>
+                        </tbody>
+                    </table> -->
+
+                    <br>
+
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <heading>Academic Services</heading>
+                                    <span style="float:right">
+                                        <span class="iconify" data-icon="ic:outline-volunteer-activism" data-inline="true"></span>
+                                        Volunteer
+                                        <span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>
+                                        Reviewer
+                                        <span class="iconify" data-icon="ic:outline-rate-review" data-inline="true" style="color: #E67E22;"></span>
+                                        Top reviewer
+                                    </span>
+                                    <ul>
+                                        <li>
+                                            AAAI:
+                                            2023
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            ICLR:
+                                            2020
+                                            (<span class="iconify" data-icon="ic:outline-volunteer-activism" data-inline="true"></span>)
+                                            ,
+                                            2021
+                                            (<span class="iconify" data-icon="ic:outline-volunteer-activism" data-inline="true"></span>)
+                                            ,
+                                            2022
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                            ,
+                                            2023
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            ICML:
+                                            2020
+                                            (<span class="iconify" data-icon="ic:outline-volunteer-activism" data-inline="true"></span>)
+                                            ,
+                                            2021
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true" style="color: #E67E22;"></span>
+                                             <span class="iconify" data-icon="ic:outline-volunteer-activism" data-inline="true"></span>)
+                                            ,
+                                            2022
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            NeurIPS:
+                                            2020
+                                            (<span class="iconify" data-icon="ic:outline-volunteer-activism" data-inline="true"></span>)
+                                            ,
+                                            2021
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            IEEE Transactions on Pattern Analysis and Machine Intelligence
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            Transactions on Machine Learning Research
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            IEEE Transactions on Image Processing
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            IEEE Transactions on Multimedia
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                        <li>
+                                            Machine Vision and Applications
+                                            (<span class="iconify" data-icon="ic:outline-rate-review" data-inline="true"></span>)
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <heading>Miscellaneous</heading>
+                                    <ul>
+                                        <li>
+                                            <a href="projects/minerl-2019/index.html">MineRL competition 2019 submission</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://github.com/kaixin96/rl-generalization-paper" target="_blank">RL generalization papers</a>:
+                                            A list of papers regarding generalization in (deep) reinforcement learning.
+                                        </li>
+                                        <li>
+                                            <a href="blog/index.html">Blog</a>: update infrequently
+                                        </li>
+                                        <li>
+                                            <a href="rl_paper.html">Interesting RL papers</a>:
+                                            a collection of RL papers that study interesting questions
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <heading>My Academic Toolbox</heading>
+                                    <ul>
+                                        <li>
+                                            🎨 <a href="https://www.diagrams.net/" target="_blank">Draw.io (now diagrams.net)</a>:
+                                            A very powerful yet easy-to-use tool for creating diagrams / plots.
+                                        </li>
+                                        <li>
+                                            💿 <a href="https://github.com/vict0rsch/PaperMemory" target="_blank">PaperMemory</a>:
+                                            A handy browser extension to store papers I read, and much more.
+                                        </li>
+                                        <li>
+                                            📐 <a href="https://www.geogebra.org/" target="_blank">GeoGebra</a>:
+                                            A nice tool for interactive visualization of 2D/3D geometry.
+                                        </li>
+                                        <li>
+                                            ∭ <a href="https://www.chachatelier.fr/latexit/" target="_blank">LaTeXiT</a>:
+                                            A handy equation editor when I do need LaTex rather than MathJax (<i>e.g.</i>, using <code>euscript</code> font).
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+
+                    <hr>
+                    <p style="float:right">This page is forked from <a href="https://jonbarron.info/" target="_blank">here</a> 🚀</p>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
