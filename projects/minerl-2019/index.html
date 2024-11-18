@@ -1,0 +1,187 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://kit.fontawesome.com/d4f46cb594.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="academicons-1.8.6/css/academicons.min.css" />
+
+    <title>MineRL Competition</title>
+
+    <meta name="author" content="Wang Kaixin">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="../../stylesheet.css">
+    <link rel="icon" type="image/png" href="diamond.png">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- Mathjax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    <table
+        style="width:100%;max-width:850px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+        <tbody>
+            <tr style="padding:0px">
+                <td style="padding:0px">
+                    <p style="float:right"><a href="../../index.html"><i class="fa fa-home"></i> Home</a></p>
+                    
+                    <h1>MineRL Competition 2019</h1>
+                    <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <heading>Overview</heading>
+                                    <p>
+                                        This is the project page of our submission for the NeurIPS 2019 MineRL competition.
+                                        Our team CraftRL ranks 4th on the final leaderboard, achieving an average reward of 23.81.
+                                        In the train/val environment, we manage to reach 50/70 in average reward.
+                                    </p>
+                                    <p>
+                                        We first train an agent to perform treechop tasks with POV frame as its observation.
+                                        Next, we fix the treechop agent and view the treechop task as an option.
+                                        Together with other options (crafting wooden pickaxe, digging down, etc.), we train
+                                        a meta-controller to decide between options, where the observation is agent's inventory.
+                                    </p>
+                                    <p style="text-align: center;">
+                                        <img style="max-width: 48%;" src="./minerl_tree.svg">
+                                        <span style="display: inline-block; width: 3%;"></span>
+                                        <img style="max-width: 48%;" src="./minerl_meta.svg">
+                                    </p>
+                                    <p>
+                                        To facilitate learning, we group actions into macro-actions.
+                                        For example, when training treechop agent, the "attack" macro-action actually consists of
+                                        35 consecutive attack actions in the original action space. In the <em>ObtainDiamond</em>
+                                        environment, the agent need more than 65 consecutive attacks to break a log (and get a reward).
+                                        Without action grouping, the agent may never explore this reward.
+                                        Next, we detail our method for training treechop agent and the meta-controller.
+                                    </p>
+                                    <heading>Treechop</heading>
+                                    <p>
+                                        Inspired by the <a href="https://github.com/minerllabs/baselines">baseline</a> model,
+                                        we remove unnecessary actions (e.g. sprint, sneak) from the action space and
+                                        do some action space wrapping. Below is the mapping between macro-actions and original actions.
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <strong>forward & jump</strong>: forward, jump, attack at the same time and repeat it for 5 consecutive frames
+                                        </li>
+                                        <li>
+                                            <strong>attack</strong>: attack for 35 consecutive frames
+                                        </li>
+                                        <li>
+                                            <strong>turn left</strong>: change yaw with \(\Delta_{yaw}=-40\) and attack at the same time
+                                        </li>
+                                        <li>
+                                            <strong>turn right</strong>: change yaw with\(\Delta_{yaw}=40\) and attack at the same time
+                                        </li>
+                                    </ul>
+                                    <p>
+                                        We train our agent in <em>ObtainDiamondDense</em> environment because we find the agent trained in the
+                                        <em>Treechop</em> environment performs bad in <em>ObtainDiamond</em> environment.
+                                        A possible reason is that <em>Treechop</em> environment is not diverse enough.
+                                        POV frame is used as the observation and the inventory information is ignored at this stage.
+                                        Besides, we find that fixing camera pitch value at 30 could help the agent obtain more logs.
+                                        We use <a href="https://arxiv.org/abs/1707.06347">PPO</a> to train the agent.
+                                        Due to memory limit, we only use 2 actors. For other hyperparameters,
+                                        please refer to the <a href="https://github.com/kaixin96/MineRL_submission">source code</a>.
+                                        The training curve is shown below.
+                                    </p>
+                                    <div id="treechop-plot"></div>
+                                    <script>
+                                        // From: https://www.w3schools.com/js/js_json_parse.asp
+                                        var xmlhttp = new XMLHttpRequest();
+                                        xmlhttp.onreadystatechange = function () {
+                                            if (this.readyState == 4 && this.status == 200) {
+                                                var plotly_vars = JSON.parse(this.responseText);
+                                                Plotly.newPlot('treechop-plot', plotly_vars['data'], plotly_vars['layout'], plotly_vars['config']);
+                                            }
+                                        };
+                                        xmlhttp.open("GET", "treechop_plot.json", true);
+                                        xmlhttp.send();
+                                    </script>
+                                    <heading>Meta-controller</heading>
+                                    <p>
+                                        Once the treechop agent is trained, we fix it and view it as an option.
+                                        We manually define other options and then train a meta-controller to accomplish the task.
+                                        Except "chop tree", other options are grouped actions, just like macro-actions.
+                                        A possible and reasonable improvement is to automatically construct the options instead of relying on
+                                        manual design, though we haven't explore it in the competition.
+                                        In our submission, each option is defined as follows:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <strong>chop tree</strong>: take several steps with the treechop agent
+                                        </li>
+                                        <li>
+                                            <strong>dig down</strong>: dig straight down for some steps and then attack the blocks around
+                                        </li>
+                                        <li>
+                                            <strong>craft wooden pickaxe</strong>: craft sticks and a crafting table,
+                                            place a crafting table, make a wooden pickaxe, then break the crafting table and collect it
+                                        </li>
+                                        <li>
+                                            <strong>craft stone pickaxe</strong>: place a crafting table, make a stone pickaxe,
+                                            then break the crafting table and collect it
+                                        </li>
+                                        <li>
+                                            <strong>craft furnace</strong>: place a crafting table, make a furnace,
+                                            then break the crafting table and collect it
+                                        </li>
+                                    </ul>
+                                    <p>
+                                        In addition, we find pretraining the meta-controller on demonstration data can improve the performance.
+                                        Since the action space in the demonstration data does not match that in the meta-controller,
+                                        we apply the following mapping to align them: given a demonstration trajectory, we first find the steps
+                                        where the agent takes "nearbyCraft" actions to make wooden pickaxe or stone pickaxe or furnace.
+                                        These steps divide the whole trajectory into several segments.
+                                        We assume that the agent chops trees in the first segment and digs down in other segments.
+                                        To make the data balanced, we extract only a few steps from each segment with equal intervals.
+                                        The whole process is illustrated below. In this way, we are able to transform the action space
+                                        and at the meantime shorten the trajectory length significantly.
+                                    </p>
+                                    <p style="text-align: center;">
+                                        <img style="max-width: 90%;" src="./minerl_meta_demo.png">
+                                    </p>
+                                    <p>
+                                        The meta-controller is implemented as an MLP and trained using PPO too. The training curves are shown below.
+                                    </p>
+                                    <div id="meta_controller-plot"></div>
+                                    <script>
+                                        // From: https://www.w3schools.com/js/js_json_parse.asp
+                                        var xmlhttp = new XMLHttpRequest();
+                                        xmlhttp.onreadystatechange = function () {
+                                            if (this.readyState == 4 && this.status == 200) {
+                                                var plotly_vars = JSON.parse(this.responseText);
+                                                Plotly.newPlot('meta_controller-plot', plotly_vars['data'], plotly_vars['layout'], plotly_vars['config']);
+                                            }
+                                        };
+                                        xmlhttp.open("GET", "meta_controller_plot.json", true);
+                                        xmlhttp.send();
+                                    </script>
+                                    <heading>Our team</heading>
+                                    <ul>
+                                        <li>
+                                            <strong>Member</strong>: Kaixin Wang, Yujun Shi, Hao Zhang, Bingyi Kang,
+                                            <a href="http://hxu.rocks/">Huazhe Xu</a>
+                                        </li>
+                                        <li>
+                                            <strong>Advisor</strong>: <a href="https://sites.google.com/site/jshfeng/home">Jiashi Feng</a>
+                                        </li>
+                                    </ul>
+                                    Special thanks to Yaqi Xie for helping present the results at NeurIPS 2019.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
