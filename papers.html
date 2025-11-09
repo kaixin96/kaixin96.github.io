@@ -1,0 +1,740 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://kit.fontawesome.com/d4f46cb594.js" crossorigin="anonymous"></script>
+    <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&display=swap"
+        rel="stylesheet">
+
+    <title>Research Works</title>
+
+    <meta name="author" content="Wang Kaixin">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+</head>
+
+<script type="text/javascript">
+    function prior_start(id) {
+        document.getElementById(id).style.opacity = "1";
+        var c = document.getElementById(id).parentNode.childNodes;
+        for (var i = 0; i < c.length; i++) {
+            if (c[i].className == "bottom-right") {
+                c[i].style.opacity = "0";
+                break;
+            }        
+        }
+    }
+
+    function prior_stop(id) {
+        document.getElementById(id).style.opacity = "0";
+        var c = document.getElementById(id).parentNode.childNodes;
+        for (var i = 0; i < c.length; i++) {
+            if (c[i].className == "bottom-right") {
+                c[i].style.opacity = "1";
+                break;
+            }        
+        }
+    }
+</script>
+
+<style>
+    .bottom-right {
+        position: absolute;
+        bottom: 30px;
+        right: 5px;
+        transition: opacity .5s ease-in-out;
+        -moz-transition: opacity .5s ease-in-out;
+        -webkit-transition: opacity .5s ease-in-out;
+    }
+
+</style>
+
+<body>
+    <table
+        style="width:100%;max-width:850px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+        <tbody>
+            <tr style="padding:0px">
+                <td style="padding:0px">
+                    <p style="float:right"><a href="index.html"><i class="fa fa-home"></i> Home</a></p>
+
+                    <h1 style="font-family: 'Titillium Web', sans-serif">
+                        Research Works
+                    </h1>
+                    <hr>
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2510.26433.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2510.26433" target="_blank">
+                                        <papertitle>
+                                            Co-Evolving Latent Action World Models
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Yucen Wang, Fengming Zhang, De-Chuan Zhan, Li Zhao, <strong>Kaixin Wang<sup>†</sup></strong>, Jiang Bian
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">arXiv 2025</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2510.26433" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2507.03298.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2507.03298" target="_blank">
+                                        <papertitle>
+                                            Dyn-O: Building Structured World Models with Object-Centric Representations
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Zizhao Wang, <strong>Kaixin Wang</strong>, Li Zhao, Peter Stone, Jiang Bian
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">NeurIPS 2025</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2507.03298" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2506.15691.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2506.15691" target="_blank">
+                                        <papertitle>
+                                            What Do Latent Action Models Actually Learn?
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Chuheng Zhang*, Tim Pearce*, Pushi Zhang, <strong>Kaixin Wang</strong>, Xiaoyu Chen, Wei Shen, Li Zhao, Jiang Bian
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">NeurIPS 2025</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2506.15691" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2507.23682.gif' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2507.23682" target="_blank">
+                                        <papertitle>
+                                            villa-X: Enhancing Latent Action Modeling in Vision-Language-Action Models
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Xiaoyu Chen*, Hangxing Wei*, Pushi Zhang*, Chuheng Zhang*, <strong>Kaixin Wang*</strong>,
+                                        Yanjiang Guo, Rushuai Yang, Yucen Wang, Xinquan Xiao, Li Zhao, Jianyu Chen, Jiang Bian
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">arXiv 2025</em>
+                                    <br>
+                                    <a href="https://microsoft.github.io/villa-x/" target="_blank">
+                                        <span class="iconify-inline" data-icon="ant-design:home-outlined"></span>
+                                        site
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://arxiv.org/abs/2507.23682" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/microsoft/villa-x/" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2502.11537.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2502.11537" target="_blank">
+                                        <papertitle>
+                                            Uncovering Untapped Potential in Sample-Efficient World Model Agents
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Lior Cohen, <strong>Kaixin Wang</strong>, Bingyi Kang, Uri Gadot, Shie Mannor
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">arXiv 2025</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2502.11537" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/leor-c/Simulus" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/physical-law.gif' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2411.02385" target="_blank">
+                                        <papertitle>
+                                            How Far is Video Generation from World Model: A Physical Law Perspective
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Bingyi Kang*, Yang Yue*, Rui Lu, Zhijie Lin, Yang Zhao, <strong>Kaixin Wang</strong>, Gao Huang, Jiashi Feng
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2025</em>
+                                    <br>
+                                    <a href="https://phyworld.github.io/" target="_blank">
+                                        <span class="iconify-inline" data-icon="ant-design:home-outlined"></span>
+                                        site
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://arxiv.org/abs/2411.02385" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/phyworld/phyworld" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/cprocgen.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://openreview.net/forum?id=nZB1FpXUU6" target="_blank">
+                                        <papertitle>
+                                            Implicit Curriculum in Procgen Made Explicit
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Zhenxiong Tan*, <strong>Kaixin Wang*</strong>, Xinchao Wang
+                                    </span>
+                                    <br>
+                                    <em >NeurIPS 2024 <span style="color:#c0392b;"><strong>(spotlight)</strong></span></em>
+                                    <br>
+                                    <a href="https://github.com/zxtan98/cprocgen" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2402.05643.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2402.05643" target="_blank">
+                                        <papertitle>
+                                            Improving Token-Based World Models with Parallel Observation Prediction
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Lior Cohen, <strong>Kaixin Wang</strong>, Bingyi Kang, Shie Mannor
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2024</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2402.05643" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/leor-c/rem" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2306.05859.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2306.05859" target="_blank">
+                                        <papertitle>
+                                            Bring Your Own (Non-Robust) Algorithm to Solve Robust MDPs by Estimating The Worst Kernel
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Uri Gadot*, <strong>Kaixin Wang*</strong>, Navdeep Kumar, Kfir Y. Levy, Shie Mannor
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2024</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2306.05859" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/Ugadot/EWoK" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2301.13642.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2301.13642" target="_blank">
+                                        <papertitle>
+                                            Efficient Value Iteration for s-rectangular Robust Markov Decision Processes
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Navdeep Kumar, <strong>Kaixin Wang</strong>, Kfir Y. Levy, Shie Mannor
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2024</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2301.13642" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/PPG.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://proceedings.mlr.press/v202/wang23aw.html" target="_blank">
+                                        <papertitle>
+                                            PPG Reloaded: An Empirical Study on What Matters in Phasic Policy Gradient
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        <strong>Kaixin Wang</strong>, Daquan Zhou, Jiashi Feng, Shie Mannor
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2023</em>
+                                    <br>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2210.13153.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://proceedings.mlr.press/v202/wang23av.html" target="_blank">
+                                        <papertitle>
+                                            Reachability-Aware Laplacian Representation in Reinforcement Learning
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        <strong>Kaixin Wang*</strong>, Kuangqi Zhou*, Jiashi Feng, Bryan Hooi, Xinchao Wang
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2023</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2210.13153" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/intrinsic.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://openreview.net/forum?id=j3GK3_xZydY" target="_blank">
+                                        <papertitle>
+                                            Revisiting Intrinsic Reward for Exploration in Procedurally Generated Environments
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        <strong>Kaixin Wang</strong>, Kuangqi Zhou, Bingyi Kang, Jiashi Feng, Shuicheng Yan
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICLR 2023</em>
+                                    <br>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/MMPQ.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://proceedings.mlr.press/v198/zhou22b.html" target="_blank">
+                                        <papertitle>Jointly Modelling Uncertainty and Diversity for Active Molecular Property Prediction
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Kuangqi Zhou, <strong>Kaixin Wang</strong>, Jian Tang, Jiashi Feng, Bryan Hooi, Peilin Zhao, Tingyang Xu, Xinchao Wang
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">LoG 2022</em>
+                                    <br>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2209.09845.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://openreview.net/forum?id=GJGU6FgB7mg" target="_blank">
+                                        <papertitle>Relational Reasoning via Set Transformers: Provable Efficiency and Applications to MARL
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Fengzhuo Zhang, Boyi Liu, <strong>Kaixin Wang</strong>, Vincent Y. F. Tan, Zhuoran Yang, Zhaoran Wang
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">NeurIPS 2022</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2209.09845" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2205.11279.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2205.11279" target="_blank">
+                                        <papertitle>Tyger: Task-Type-Generic Active Learning for Molecular Property Prediction
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Kuangqi Zhou, <strong>Kaixin Wang</strong>, Jiashi Feng, Jian Tang, Tingyang Xu, Xinchao Wang
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">arXiv 2022</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2205.11279" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2210.00991.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2210.00991">
+                                        <papertitle>Policy Gradient for Reinforcement Learning with General Utilities
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Navdeep Kumar, <strong>Kaixin Wang</strong>, Kfir Levy, Shie Mannor
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">RLDM 2022</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2210.00991" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2201.12929.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://proceedings.mlr.press/v162/wang22k.html" target="_blank">
+                                        <papertitle>
+                                            The Geometry of Robust Value Functions
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        <strong>Kaixin Wang</strong>, Navdeep Kumar, Kuangqi Zhou, Bryan Hooi, Jiashi Feng, Shie Mannor
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2022</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2201.12929" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://slideslive.com/38983474/the-geometry-of-robust-value-functions" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2006.07107.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://dl.acm.org/doi/10.1145/3459637.3482488" target="_blank">
+                                        <papertitle>Understanding and Resolving Performance Degradation in Graph
+                                            Convolutional Networks
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Kuangqi Zhou*, Yanfei Dong*, <strong>Kaixin Wang</strong>, Wee Sun Lee, Bryan Hooi, Huan Xu, Jiashi Feng
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">CIKM 2021</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2006.07107" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/miafei/NodeNorm" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://dl.acm.org/doi/10.1145/3459637.3482488" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2107.05545.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="http://proceedings.mlr.press/v139/wang21ae.html" target="_blank">
+                                        <papertitle>Towards Better Laplacian Representation in Reinforcement Learning
+                                            with Generalized Graph Drawing
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        <strong>Kaixin Wang*</strong>, Kuangqi Zhou*, Qixin Zhang, Jie Shao, Bryan Hooi, Jiashi Feng
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICML 2021</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/2107.05545" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code (coming soon)
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://slideslive.com/38958947" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/2010.10814.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a
+                                        href="https://papers.nips.cc/paper/2020/hash/5a751d6a0b6ef05cfe51b86e5d1458e6-Abstract.html" target="_blank">
+                                        <papertitle>Improving Generalization in Reinforcement Learning with Mixture
+                                            Regularization
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        <strong>Kaixin Wang</strong>, Bingyi Kang, Jie Shao, Jiashi Feng
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">NeurIPS 2020</em>
+                                    <br>
+                                    <a href="http://arxiv.org/abs/2010.10814" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/kaixin96/mixreg" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="projects/mixreg/index.html" target="_blank">
+                                        <span class="iconify-inline" data-icon="ant-design:home-outlined"></span>
+                                        site
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://slideslive.com/38937284" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/1907.05642.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://openreview.net/forum?id=HyxjOyrKvr" target="_blank">
+                                        <papertitle>Neural Epitome Search for Architecture-Agnostic Network Compression
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        Daquan Zhou, Xiaojie Jin, Qibin Hou, <strong>Kaixin Wang</strong>, Jianchao Yang,
+                                    Jiashi Feng
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICLR 2020</em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/1907.05642" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/zhoudaquan/NES" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://iclr.cc/virtual_2020/poster_HyxjOyrKvr.html" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:30%;height:200px;vertical-align:middle">
+                                    <img src='images/1908.06391.png' style="max-width:200px; max-height:200px; width:auto; height:auto;">
+                                </td>
+                                <td
+                                    style="padding-top:20px;padding-bottom:20px;width:70%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a
+                                        href="http://openaccess.thecvf.com/content_ICCV_2019/html/Wang_PANet_Few-Shot_Image_Semantic_Segmentation_With_Prototype_Alignment_ICCV_2019_paper.html"
+                                        target="_blank">
+                                        <papertitle>PANet: Few-Shot Image Semantic Segmentation with Prototype Alignment
+                                        </papertitle>
+                                    </a>
+                                    <br>
+                                    <span style="color:#000000;">
+                                        <strong>Kaixin Wang</strong>, Jun Hao Liew, Yingtian Zou, Daquan Zhou, Jiashi Feng
+                                    </span>
+                                    <br>
+                                    <em style="color:#000000;">ICCV 2019 <span style="color:#c0392b;"><strong>(oral)</strong></span></em>
+                                    <br>
+                                    <a href="https://arxiv.org/abs/1908.06391" target="_blank">
+                                        <span class="iconify-inline" data-icon="academicons:arxiv"></span>
+                                        arXiv
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://github.com/kaixin96/PANet" target="_blank">
+                                        <span class="iconify-inline" data-icon="eva:github-outline"></span>
+                                        code
+                                    </a>
+                                    &nbsp/&nbsp
+                                    <a href="https://www.youtube.com/watch?v=2ntDYowHbZs&t=1460s" target="_blank">
+                                        <span class="iconify-inline" data-icon="heroicons-outline:presentation-chart-line"></span>
+                                        presentation
+                                    </a>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
