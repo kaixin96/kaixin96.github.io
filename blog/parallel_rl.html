@@ -1,0 +1,497 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+    <link rel="stylesheet" href="academicons-1.8.6/css/academicons.min.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&display=swap"
+        rel="stylesheet">
+
+    <title>Parallelization in Reinforcement Learning</title>
+
+    <meta name="author" content="Wang Kaixin">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+</head>
+
+<style>
+    p {
+        font-family: 'Titillium Web', sans-serif;
+        font-weight: 300
+    }
+
+    a {
+        font-family: 'Titillium Web', sans-serif;
+        font-weight: 300
+    }
+
+    sup {
+        vertical-align: top;
+        font-size: 0.6em;
+    }
+
+    td {
+        font-family: 'Titillium Web', sans-serif;
+        font-weight: 300
+    }
+</style>
+
+<body style="padding-bottom: 20pt;">
+    <table
+        style="width:100%;max-width:850px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+        <tbody>
+            <tr style="padding:0px">
+                <td style="padding:0px">
+                    <p style="float:right"><a href="../index.html"><span class="iconify" data-icon="carbon:home"
+                                data-inline="true"></span> Home</a></p>
+
+                    <h1 style="font-family: 'Titillium Web', sans-serif">
+                        Parallelization in Reinforcement Learning
+                    </h1>
+                    <span style="color:#C7C7C7; font-family: 'Titillium Web', sans-serif">
+                        2 Sep. 2020
+                    </span>
+
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:100%;vertical-align:middle">
+                                    <p>
+                                        Implementation matters in Reinforcement Learning (RL), so does parallelization.
+                                        Almost every RL framework, ranging from simple<sup id="footnote_1">1</sup> to
+                                        complicated<sup id="footnote_2">2</sup>, includes code for
+                                        parallelization. However, it is often unclear which part of RL is parallelized
+                                        and which part is not until you dig into the source code. In this post, I will
+                                        discuss common parallelization practices in different parts of RL. (Hopefully)
+                                        this post can serve as a summary and offer some help when you decide your
+                                        RL framework.
+                                    </p>
+                                    <p>
+                                        <span class="iconify" data-icon="ion:earth-sharp" data-inline="true"></span>
+                                        Env<br>
+                                        <span class="iconify" data-icon="ion:earth-sharp" data-inline="true"></span> Env
+                                        <span class="iconify" data-icon="carbon:arrow-right" data-inline="true"></span>
+                                        <span class="iconify" data-icon="ion:earth-sharp" data-inline="true"></span>
+                                        VecEnv <span class="iconify" data-icon="carbon:arrow-right"
+                                            data-inline="true"></span> <span class="iconify" data-icon="carbon:magnify"
+                                            data-inline="true"></span>
+                                        BatchObs<br>
+                                        <span class="iconify" data-icon="ion:earth-sharp" data-inline="true"></span> Env
+                                    </p>
+                                    <p>
+                                        First, let us talk about parallelizing steps in environments.
+                                        This perhaps is the easiest one to implement and is regardless of policy or
+                                        algorithm.
+                                        Usually it is done by implementing vectorized environments where each
+                                        environment lives in different processes.
+                                        Speedup is gained if environment is slow to step/reset, otherwise it may be
+                                        more efficient to simply use a for-loop to step the environments.
+                                        Note that synchronization is needed in order to return a batch of observations.
+                                        Therefore, it is not suitable for environments with heterogeneous workloads
+                                        (different environments can take orders of magnitude more/less time to
+                                        simulate)<sup id="footnote_3">3</sup>.
+                                        In that case, synchronization will cause delays due to stragglers.
+                                        While asynchronous parallelization can avoid such delays, the batch size of
+                                        the returned observations will no longer be a fixed value.
+                                        A <a href="https://docs.ray.io/en/latest/rllib-env.html#vectorized"
+                                            target="_blank" rel="noopener noreferrer">timeout</a> argument can be used
+                                        to trade off between asynchrony and batch size.
+                                    </p>
+                                    <p>
+                                        <span class="iconify" data-icon="carbon:magnify" data-inline="true"></span>
+                                        Obs<br>
+                                        <span class="iconify" data-icon="carbon:magnify" data-inline="true"></span> Obs
+                                        <span class="iconify" data-icon="carbon:arrow-right" data-inline="true"></span>
+                                        <span class="iconify" data-icon="carbon:magnify" data-inline="true"></span>
+                                        BatchObs <span class="iconify" data-icon="carbon:arrow-right"
+                                            data-inline="true"></span>
+                                        <span class="iconify" data-icon="fa-brands:connectdevelop"
+                                            data-inline="true"></span>
+                                        Network<br>
+                                        <span class="iconify" data-icon="carbon:magnify" data-inline="true"></span> Obs
+                                    </p>
+                                    <p>
+                                        One reason we want to use vectorized environments is that we can feed a batch of
+                                        observations at once to the neural network for processing, in order to achieve
+                                        speedup. This kind of parallelization is often implicitly implemented (
+                                        within parallelizing environment steps or parallelizing agent steps), though in
+                                        my opinion, it is more clear to separate them.
+                                        First, batching observations applies to both actor and learner, while
+                                        parallelizing environments focuses on experience collection. Second, how you
+                                        batch observations does not depend on the parallelization mode of environments.
+                                        For example, you can call env.step() sequentially and still batch collected
+                                        observations together. Or you may use several BatchObs to build a larger batch.
+                                    </p>
+                                    <p>
+                                        <span class="iconify" data-icon="uil:robot" data-inline="true"></span> Agent
+                                        <span class="iconify" data-icon="carbon:arrow-right"
+                                            data-inline="true"></span><br>
+                                        <span class="iconify" data-icon="uil:robot" data-inline="true"></span> Agent
+                                        <span class="iconify" data-icon="carbon:arrow-right" data-inline="true"></span>
+                                        <span class="iconify" data-icon="dashicons:database" data-inline="true"></span>
+                                        Buffer / Replay / Parameter Server<br>
+                                        <span class="iconify" data-icon="uil:robot" data-inline="true"></span> Agent
+                                        <span class="iconify" data-icon="carbon:arrow-right" data-inline="true"></span>
+                                    </p>
+                                    <p>
+                                        Next, let us look at parallelizing agents. Here "agent" is a general word that
+                                        may refer to "actor" (that collects trajectories) or "worker" (that handles
+                                        both experience collection and learning). Parallelization in this part of RL is
+                                        most actively researched and benchmarked. In the "actor" context, multiple
+                                        (distributed) actors collect data during interacting with the envrionment and
+                                        send data to a buffer (with replaying if using off-policy algorithms). Actors
+                                        can act synchronously, i.e. waiting for all actors to finish before proceeding
+                                        to the next stage, as in Batched A2C<sup id="footnote_4">4</sup> and PPO<sup
+                                            id="footnote_5">5</sup>. Or they can act asynchronously, as in IMPALA<sup
+                                            id="footnote_6">6</sup> and Ape-X<sup id="footnote_7">7</sup>. To update
+                                        weights, the actors synchronously/asynchronously retrieve latest weights from
+                                        the learner before each round of experience collection. In the "worker" context,
+                                        multiple (distributed) workers collect data and learn locally, then
+                                        asynchronously send local gradient to a parameter server to update global
+                                        parameters (as in A3C<sup id="footnote_8">8</sup>) or reduce the gradients from
+                                        different workers to perform a synchronous update (as in DD-PPO<sup
+                                            id="footnote_9">9</sup> and MPI-based multiprocessing<sup
+                                            id="footnote_10_11">10,11</sup>).
+                                    </p>
+                                    <table style="width:100%;border:1px solid black;border-collapse:collapse;">
+                                        <tbody>
+                                            <tr>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+
+                                                </td>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    env steps (sync)
+                                                </td>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    env steps (async)
+                                                </td>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    batch obs
+                                                </td>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    actor steps (sync)
+                                                </td>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    actor steps (async)
+                                                </td>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    worker steps (sync)
+                                                </td>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    worker steps (async)
+                                                </td>
+                                            <tr>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    <a href="https://docs.ray.io/en/latest/rllib.html" target="_blank"
+                                                        rel="noopener noreferrer">RLlib</a>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    <a href="https://github.com/astooke/rlpyt" target="_blank"
+                                                        rel="noopener noreferrer">rlpyt</a>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    <a href="https://github.com/openai/baselines" target="_blank"
+                                                        rel="noopener noreferrer">Baselines</a>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="text-align:center;width:10%;border: 1px solid black;padding:5px;">
+                                                    <a href="https://github.com/thu-ml/tianshou" target="_blank"
+                                                        rel="noopener noreferrer">Tianshou</a>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:check"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                                <td style="text-align:center;border: 1px solid black;padding:5px;">
+                                                    <span class="iconify" data-icon="entypo:cross"
+                                                        data-inline="true"></span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p>
+                                        As far as I have searched, <a href="https://docs.ray.io/en/latest/rllib.html"
+                                            target="_blank" rel="noopener noreferrer">RLlib</a> is the framework that
+                                        supports most parallelization modes (maybe that is why it is so complicated
+                                        <span class="iconify" data-icon="twemoji:thinking-face"
+                                            data-inline="true"></span> ). The table above gives a more clear comparison
+                                        between several RL frameworks. In particular, RLlib provides a great <a
+                                            href="https://docs.ray.io/en/latest/rllib-training.html#scaling-guide"
+                                            target="_blank" rel="noopener noreferrer">scaling guide</a> that is worth
+                                        reading even if you are using other frameworks.
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <div id="graphcomment"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+
+    <script>
+        tippy('#footnote_1', {
+            content: "<a href='https://github.com/thu-ml/tianshou' target='_blank' rel='noopener noreferrer'>"
+                + "<span class='iconify' data-icon='feather:github' data-inline='true'></span> "
+                + "Tianshou</a>",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "500px"
+        });
+        tippy('#footnote_2', {
+            content: "<a href='https://github.com/ray-project/ray' target='_blank' rel='noopener noreferrer'>"
+                + "<span class='iconify' data-icon='feather:github' data-inline='true'></span> "
+                + "RLlib</a>",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+        });
+        tippy('#footnote_3', {
+            content: "<a href='https://arxiv.org/abs/1911.00357' target='_blank' rel='noopener noreferrer'>"
+                + "DD-PPO: Learning Near-Perfect PointGoal Navigators from 2.5 Billion Frames</a><br>"
+                + "Erik Wijmans, Abhishek Kadian, Ari Morcos, Stefan Lee, Irfan Essa, Devi Parikh, Manolis Savva, Dhruv Batra<br>"
+                + "ICLR 2020",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "550px"
+        });
+        tippy('#footnote_4', {
+            content: "<a href='https://openai.com/blog/baselines-acktr-a2c/' target='_blank' rel='noopener noreferrer'>"
+                + "<span class='iconify' data-icon='simple-icons:openai' data-inline='true';></span> "
+                + "OpenAI Baselines: ACKTR & A2C</a><br>",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "550px"
+        });
+        tippy('#footnote_5', {
+            content: "<a href='https://arxiv.org/abs/1707.06347' target='_blank' rel='noopener noreferrer'>"
+                + "Proximal Policy Optimization Algorithms</a><br>"
+                + "John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov<br>"
+                + "arXiv preprint",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "550px"
+        });
+        tippy('#footnote_6', {
+            content: "<a href='https://arxiv.org/abs/1802.01561' target='_blank' rel='noopener noreferrer'>"
+                + "IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures</a><br>"
+                + "Lasse Espeholt, Hubert Soyer, Remi Munos, Karen Simonyan, Volodymir Mnih, "
+                + "Tom Ward, Yotam Doron, Vlad Firoiu, Tim Harley, Iain Dunning, Shane Legg, Koray Kavukcuoglu<br>"
+                + "ICML 2018",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "550px"
+        });
+        tippy('#footnote_7', {
+            content: "<a href='https://arxiv.org/abs/1803.00933' target='_blank' rel='noopener noreferrer'>"
+                + "Distributed Prioritized Experience Replay</a><br>"
+                + "Dan Horgan, John Quan, David Budden, Gabriel Barth-Maron, Matteo Hessel, Hado van Hasselt, David Silver<br>"
+                + "ICLR 2018",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "550px"
+        });
+        tippy('#footnote_8', {
+            content: "<a href='https://arxiv.org/abs/1602.01783' target='_blank' rel='noopener noreferrer'>"
+                + "Asynchronous Methods for Deep Reinforcement Learning</a><br>"
+                + "Volodymyr Mnih, Adrià Puigdomènech Badia, Mehdi Mirza, Alex Graves, Timothy P. Lillicrap, "
+                + "Tim Harley, David Silver, Koray Kavukcuoglu<br>"
+                + "ICML 2016",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "550px"
+        });
+        tippy('#footnote_9', {
+            content: "<a href='https://arxiv.org/abs/1911.00357' target='_blank' rel='noopener noreferrer'>"
+                + "DD-PPO: Learning Near-Perfect PointGoal Navigators from 2.5 Billion Frames</a><br>"
+                + "Erik Wijmans, Abhishek Kadian, Ari Morcos, Stefan Lee, Irfan Essa, Devi Parikh, Manolis Savva, Dhruv Batra<br>"
+                + "ICLR 2020",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "550px"
+        });
+        tippy('#footnote_10_11', {
+            content: "<a href='https://github.com/openai/baselines' target='_blank' rel='noopener noreferrer'>"
+                + "<span class='iconify' data-icon='feather:github' data-inline='true'></span> "
+                + "Baselines</a><br>"
+                + "<a href='https://github.com/hill-a/stable-baselines' target='_blank' rel='noopener noreferrer'>"
+                + "<span class='iconify' data-icon='feather:github' data-inline='true'></span> "
+                + "Stable Baselines</a>",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+        });
+    </script>
+    <script type="text/javascript">
+
+        /* - - - CONFIGURATION VARIABLES - - - */
+
+        // make sure the id is yours
+        window.gc_params = {
+            graphcomment_id: 'kaixin',
+
+            // if your website has a fixed header, indicate it's height in pixels
+            fixed_header_height: 0,
+        };
+
+        /* - - - DON'T EDIT BELOW THIS LINE - - - */
+
+
+        (function () {
+            var gc = document.createElement('script'); gc.type = 'text/javascript'; gc.async = true;
+            gc.src = 'https://graphcomment.com/js/integration.js?' + Math.round(Math.random() * 1e8);
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(gc);
+        })();
+
+    </script>
+</body>
+
+</html>
