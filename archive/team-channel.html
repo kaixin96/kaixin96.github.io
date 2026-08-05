@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vibe Gaming Autonomous Teamwork Demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400,500,700">
+<link rel="stylesheet" href="./assets/css/main.css">
+<style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body {
+    padding: 0;
+  }
+
+  d-article[data-standalone-demo] {
+    display: block;
+    font-size: 1.06rem;
+    font-weight: 300;
+    line-height: 28.832px;
+  }
+
+  d-article[data-standalone-demo] h3 {
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  d-article[data-standalone-demo] h4 {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 767px) {
+    html {
+      font-size: 14px;
+    }
+
+    d-article[data-standalone-demo] {
+      font-size: 1rem;
+      line-height: 21px;
+    }
+
+    d-article[data-standalone-demo] h3 {
+      font-size: 18px;
+    }
+  }
+</style>
+  </head>
+  <body>
+    <d-article data-standalone-demo>
+      <link rel="stylesheet" href="./assets/css/multiagent/team-channel.css">
+    <link rel="stylesheet" href="./assets/css/influence/conversation.css">
+    <link rel="stylesheet" href="./assets/css/growth/expedition.css">
+
+<style>
+  /* Scoped tweaks so the team-channel keeps a wide video like influence,
+     with the shared channel feed on the right. */
+  .team .expedition__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  }
+  .team .expedition__stage { min-width: 0; }
+  .team .expedition__video-shell {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+  }
+  @media (max-width: 760px) {
+    .team .expedition__layout { grid-template-columns: 1fr; }
+  }
+</style>
+
+<section class="conversation team" data-team-conversation aria-label="Multi-agent team channel">
+  <div class="conversation__intro">
+    <div class="conversation__intro-top">
+      <h3>Autonomous Teamwork</h3>
+      <div class="team__roster" role="group" aria-label="Team roster">
+        <span class="team__agent" data-team-agent="nova"><span class="team__avatar team__avatar--nova">N</span>Nova</span>
+        <span class="team__agent" data-team-agent="milo"><span class="team__avatar team__avatar--milo">M</span>Milo</span>
+        <span class="team__agent" data-team-agent="ares"><span class="team__avatar team__avatar--ares">A</span>Ares</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="expedition__layout">
+    <div class="expedition__stage">
+      <div class="expedition__video-shell">
+        <video class="expedition__video" data-team-video muted playsinline preload="auto" hidden></video>
+        <div class="expedition__video-placeholder" data-team-placeholder>
+          <span>Press Start to play</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="expedition__flow" aria-label="Team channel feed">
+      <div class="expedition__flow-header">
+        <div>
+          <h4>SHARED TEAM CHANNEL</h4>
+        </div>
+        <div class="expedition__controls">
+          <button type="button" data-team-toggle disabled>Pause</button>
+          <button type="button" data-team-replay>Start</button>
+        </div>
+      </div>
+      <div class="expedition__log team__feed" data-team-feed aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script type="application/json" data-team-data>
+    {
+      "clips": [
+        { "src": "./assets/video/multiagent/no-user-split-00.mp4?v=20260722c", "start": 0.0,   "duration": 47.73 },
+        { "src": "./assets/video/multiagent/no-user-split-01.mp4?v=20260722c", "start": 47.71, "duration": 47.70 }
+      ],
+      "duration": 95.42,
+      "agents": {
+        "milo": { "name": "Milo" },
+        "nova": { "name": "Nova" },
+        "ares": { "name": "Ares" }
+      },
+      "events": [
+        { "t": 0.2, "agent": "milo", "type": "broadcast", "text": "Welcome to our new home. Please look around and tell me what we still need." },
+        { "t": 1.2, "agent": "nova", "type": "broadcast", "text": "The space looks good. It is large enough for a bed and a door, so we can make it more comfortable and secure." },
+        { "t": 2.4, "agent": "ares", "type": "broadcast", "text": "The structure looks solid. If we gather more supplies, we can make it safer against danger outside." },
+        { "t": 7.0, "agent": "milo", "type": "action", "text": "calculates the materials needed for a door and a bed, including wood and wool from sheep." },
+        { "t": 10.2, "agent": "milo", "type": "memory", "text": "The new home still needs a door and a bed. Milo should prepare the crafting plan, while Ares can gather wood and wool outside." },
+        { "t": 12.4, "agent": "milo", "type": "directed", "to": "ares", "text": "Ares, we need materials for a door and a bed. Please collect wood, and if you find sheep, gather wool so we can finish the shelter." },
+        { "t": 14.8, "agent": "ares", "type": "directed", "to": "milo", "text": "No problem. I will gather the materials and bring them back." },
+        { "t": 21.3, "agent": "ares", "type": "action", "text": "kills sheep to collect wool." },
+        { "t": 28.3, "agent": "ares", "type": "action", "alert": true, "text": "accidentally falls into a pond near (-30, -86). There are fish there, but the water is dangerous and he may drown if he stays too long." },
+        { "t": 34.9, "agent": "ares", "type": "memory", "text": "The pond near (-30, -86) is dangerous and should be avoided." },
+        { "t": 37.5, "agent": "ares", "type": "broadcast", "alert": true, "text": "Be careful around (-30, -86). There is a pond or small lake there, and it is dangerous enough to drown in." },
+        { "t": 41.4, "agent": "ares", "type": "broadcast", "text": "I have enough materials now. I am returning to the house." },
+        { "t": 53.3, "agent": "ares", "type": "broadcast", "text": "These are all the materials I collected. Please check whether they are enough." },
+        { "t": 55.3, "agent": "milo", "type": "broadcast", "text": "Good. I will check the materials now." },
+        { "t": 57.3, "agent": "milo", "type": "action", "text": "checks the inventory and confirms the materials are sufficient." },
+        { "t": 63.3, "agent": "milo", "type": "broadcast", "text": "The materials are enough. I will start crafting the door and bed." },
+        { "t": 67.65, "agent": "milo", "type": "action", "text": "builds a crafting table." },
+        { "t": 69.55, "agent": "milo", "type": "action", "text": "crafts a door." },
+        { "t": 73.3, "agent": "milo", "type": "action", "text": "places the door on the shelter." },
+        { "t": 75.55, "agent": "milo", "type": "action", "text": "checks that the door is placed correctly." },
+        { "t": 83.633333, "agent": "milo", "type": "action", "text": "crafts a bed." },
+        { "t": 88.633333, "agent": "milo", "type": "action", "text": "places the bed inside the shelter." },
+        { "t": 90.966667, "agent": "milo", "type": "memory", "text": "The new home now has a door and a bed. Ares can gather resources independently, Milo can turn the gathered materials into shelter upgrades, and dangerous locations should be shared with the team." }
+      ]
+    }
+  </script>
+</section>
+
+<script>
+  (function () {
+    function initTeam(root) {
+      var data = JSON.parse(root.querySelector("[data-team-data]").textContent);
+      var events = (data.events || []).slice().sort(function (a, b) { return a.t - b.t; });
+      var agents = data.agents || {};
+
+      var feed = root.querySelector("[data-team-feed]");
+      var video = root.querySelector("[data-team-video]");
+      var placeholder = root.querySelector("[data-team-placeholder]");
+      var toggle = root.querySelector("[data-team-toggle]");
+      var replay = root.querySelector("[data-team-replay]");
+      function syncControlLabel(button) {
+        function update() {
+          button.setAttribute("aria-label", button.textContent.trim() + " " + root.getAttribute("aria-label"));
+        }
+        update();
+        new MutationObserver(update).observe(button, { childList: true, characterData: true, subtree: true });
+      }
+      syncControlLabel(toggle);
+      syncControlLabel(replay);
+      var stage = root.querySelector(".expedition__stage");
+      var flow = root.querySelector(".expedition__flow");
+
+      var clips = (data.clips || []).slice();
+      // Backward-compat: allow `data.video` as a single-clip shorthand.
+      if (!clips.length && data.video) {
+        clips.push({ src: data.video, start: 0, duration: data.duration || 0 });
+      }
+      var textOnly = new URLSearchParams(window.location.search).get("textOnly") === "1";
+      var hasVideo = !textOnly && !!video && clips.length > 0;
+      var currentClipIndex = 0;
+      if (textOnly) {
+        root.classList.add("team--text-only");
+        if (video) video.hidden = true;
+        if (placeholder) placeholder.hidden = true;
+      }
+
+      var roster = {};
+      Array.prototype.forEach.call(root.querySelectorAll("[data-team-agent]"), function (el) {
+        roster[el.dataset.teamAgent] = el;
+      });
+
+      var typeDelay = 14;
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      var firedIndex = 0;      // next event index to fire
+      var lastTime = 0;
+      var typingQueue = [];    // queued messages waiting to type (throttle)
+      var typingActive = false;
+      var hasStarted = false;
+      var finished = false;
+      var activeAgent = null;
+      var feedShouldStick = true;
+      var freezeCanvas = null;
+
+      feed.addEventListener("scroll", function () {
+        feedShouldStick = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
+      }, { passive: true });
+
+      function keepFeedAtBottom() {
+        if (feedShouldStick) feed.scrollTop = feed.scrollHeight;
+      }
+
+      function nameOf(agent) {
+        return (agents[agent] && agents[agent].name) || agent;
+      }
+
+      function setActive(agent) {
+        if (activeAgent === agent) return;
+        activeAgent = agent;
+        for (var k in roster) {
+          roster[k].classList.toggle("is-active", k === agent);
+        }
+      }
+
+      function syncFlowHeight() {
+        if (!stage || !flow) return;
+        if (window.matchMedia("(max-width: 760px)").matches) {
+          flow.style.height = "520px";
+          return;
+        }
+        flow.style.height = stage.offsetHeight + "px";
+      }
+
+      function prepareTypedContent(el) {
+        var typed = document.createElement("span");
+        typed.className = "team__typed-text";
+        typed.setAttribute("data-team-typed", "");
+        el.appendChild(typed);
+      }
+
+      function typedTarget(el) {
+        return el.querySelector("[data-team-typed]") || el;
+      }
+
+      function renderBubble(ev) {
+        if (ev.type === "action") {
+          var line = document.createElement("div");
+          line.className = "team__action";
+          var icon = document.createElement("span");
+          icon.className = "team__action-icon";
+          icon.textContent = ev.alert ? "\u26a0" : "\u2699";
+          var label = document.createElement("span");
+          label.textContent = nameOf(ev.agent) + " ";
+          var txt = document.createElement("span");
+          txt.className = "team__action-text";
+          prepareTypedContent(txt);
+          label.appendChild(txt);
+          line.appendChild(icon);
+          line.appendChild(label);
+          feed.appendChild(line);
+          requestAnimationFrame(function () { line.classList.add("is-in"); });
+          keepFeedAtBottom();
+          return txt;
+        }
+
+        var wrap = document.createElement("div");
+        wrap.className = "team__msg team__msg--" + ev.agent;
+
+        var avatar = document.createElement("span");
+        avatar.className = "team__msg-avatar team__avatar team__avatar--" + ev.agent;
+        avatar.textContent = nameOf(ev.agent).charAt(0);
+
+        var body = document.createElement("div");
+        body.className = "team__msg-body";
+
+        var head = document.createElement("div");
+        head.className = "team__msg-head";
+        var name = document.createElement("span");
+        name.className = "team__name team__name--" + ev.agent;
+        name.textContent = nameOf(ev.agent);
+        head.appendChild(name);
+
+        if (ev.type === "directed") {
+          var arrow = document.createElement("span");
+          arrow.className = "team__arrow";
+          arrow.textContent = "\u2192";
+          var to = document.createElement("span");
+          to.className = "team__badge team__badge--to";
+          to.textContent = "to " + nameOf(ev.to);
+          head.appendChild(arrow);
+          head.appendChild(to);
+        } else if (ev.type === "memory" || ev.type === "skill") {
+          var mem = document.createElement("span");
+          mem.className = "team__badge " + (ev.type === "skill" ? "team__badge--skill" : "team__badge--memory");
+          mem.textContent = ev.type === "skill" ? "\u2726 new skill" : "\ud83d\udca1 new memory";
+          head.appendChild(mem);
+        } else {
+          var bc = document.createElement("span");
+          bc.className = "team__badge " + (ev.alert ? "team__badge--alert" : "team__badge--broadcast");
+          bc.textContent = ev.alert ? "\u26a0 alert \u00b7 to team" : "\ud83d\udce2 to team";
+          head.appendChild(bc);
+        }
+        body.appendChild(head);
+
+        var content = document.createElement("div");
+        content.className = (ev.type === "memory" || ev.type === "skill")
+          ? ("team__memory" + (ev.type === "skill" ? " team__memory--skill" : ""))
+          : ("team__bubble team__bubble--" + ev.agent + (ev.alert ? " team__bubble--alert" : ""));
+        prepareTypedContent(content);
+        body.appendChild(content);
+
+        wrap.appendChild(avatar);
+        wrap.appendChild(body);
+        feed.appendChild(wrap);
+        requestAnimationFrame(function () { wrap.classList.add("is-in"); });
+        keepFeedAtBottom();
+        return content;
+      }
+
+      function typeInto(el, text, done) {
+        var target = typedTarget(el);
+        el.classList.add("is-typing");
+        if (reduceMotion || !text) {
+          target.textContent = text || "";
+          el.classList.remove("is-typing");
+          keepFeedAtBottom();
+          done();
+          return;
+        }
+        var i = 0;
+        function step() {
+          i += 1;
+          target.textContent = text.slice(0, i);
+          keepFeedAtBottom();
+          if (i < text.length) {
+            window.setTimeout(step, typeDelay);
+          } else {
+            el.classList.remove("is-typing");
+            done();
+          }
+        }
+        step();
+      }
+
+      function drainQueue() {
+        if (typingActive) return;
+        var next = typingQueue.shift();
+        if (!next) return;
+        typingActive = true;
+        setActive(next.agent);
+        var content = renderBubble(next);
+        typeInto(content, String(next.text || ""), function () {
+          typingActive = false;
+          drainQueue();
+        });
+      }
+
+      function enqueue(ev) {
+        typingQueue.push(ev);
+        drainQueue();
+      }
+
+      function globalTime() {
+        var clip = clips[currentClipIndex];
+        var base = clip ? Number(clip.start || 0) : 0;
+        return base + (video ? (video.currentTime || 0) : 0);
+      }
+
+      function freezeFrame() {
+        if (!video.videoWidth || !video.videoHeight) return;
+        if (!freezeCanvas) {
+          freezeCanvas = document.createElement("canvas");
+          freezeCanvas.className = "expedition__video-freeze";
+          video.parentNode.appendChild(freezeCanvas);
+        }
+        freezeCanvas.width = video.videoWidth;
+        freezeCanvas.height = video.videoHeight;
+        try {
+          freezeCanvas.getContext("2d").drawImage(video, 0, 0, freezeCanvas.width, freezeCanvas.height);
+        } catch (e) { return; }
+        freezeCanvas.style.display = "block";
+      }
+
+      function unfreeze() {
+        if (freezeCanvas) freezeCanvas.style.display = "none";
+      }
+
+      function onTimeUpdate() {
+        var t = globalTime();
+        // handle scrubbing backwards within the current clip
+        if (t + 0.25 < lastTime) {
+          resetFeed(true);
+          currentClipIndex = 0;
+        }
+        lastTime = t;
+        while (firedIndex < events.length && events[firedIndex].t <= t) {
+          enqueue(events[firedIndex]);
+          firedIndex += 1;
+        }
+      }
+
+      function loadClip(index, autoplay) {
+        var clip = clips[index];
+        if (!clip) return;
+        currentClipIndex = index;
+        // Unhide before loading — Chromium can abort loads on display:none elements.
+        video.hidden = false;
+        if (placeholder) placeholder.hidden = true;
+        if (video.getAttribute("src") !== clip.src) {
+          freezeFrame();
+          video.setAttribute("src", clip.src);
+          video.load();
+        }
+        try { video.currentTime = 0; } catch (e) {}
+        if (autoplay) {
+          var p = video.play();
+          if (p && p.catch) {
+            p.catch(function () {
+              video.addEventListener("canplay", function retry() {
+                video.removeEventListener("canplay", retry);
+                var r = video.play();
+                if (r && r.catch) r.catch(function () {});
+              });
+            });
+          }
+        }
+      }
+
+      function onClipEnded() {
+        // Advance to the next clip if any; otherwise finish.
+        if (currentClipIndex + 1 < clips.length) {
+          // flush events up to the end of the finished clip
+          var boundary = Number(clips[currentClipIndex].start || 0) + Number(clips[currentClipIndex].duration || 0);
+          while (firedIndex < events.length && events[firedIndex].t <= boundary) {
+            enqueue(events[firedIndex]);
+            firedIndex += 1;
+          }
+          loadClip(currentClipIndex + 1, true);
+          return;
+        }
+        onVideoEnded();
+      }
+
+      function onVideoEnded() {
+        // flush any remaining events (in case timeupdate missed the tail)
+        while (firedIndex < events.length) {
+          enqueue(events[firedIndex]);
+          firedIndex += 1;
+        }
+        finished = true;
+        toggle.disabled = true;
+        toggle.textContent = "Pause";
+        replay.textContent = "Replay";
+      }
+
+      function resetFeed(keepPlaying) {
+        typingQueue.length = 0;
+        typingActive = false;
+        firedIndex = 0;
+        lastTime = 0;
+        finished = false;
+        feed.innerHTML = "";
+        feedShouldStick = true;
+        setActive(null);
+        if (!keepPlaying) {
+          try { video.pause(); } catch (e) {}
+          try { video.currentTime = 0; } catch (e) {}
+          currentClipIndex = 0;
+        }
+      }
+
+      function start() {
+        hasStarted = true;
+        resetFeed(false);
+        toggle.disabled = !hasVideo;
+        toggle.textContent = "Pause";
+        replay.textContent = "Replay";
+        if (hasVideo) {
+          loadClip(0, true);
+        } else {
+          // text-only: fire events on a virtual clock
+          var startTs = Date.now();
+          (function tick() {
+            if (finished) return;
+            var t = (Date.now() - startTs) / 1000;
+            while (firedIndex < events.length && events[firedIndex].t <= t) {
+              enqueue(events[firedIndex]);
+              firedIndex += 1;
+            }
+            if (firedIndex < events.length) {
+              window.setTimeout(tick, 200);
+            } else {
+              onVideoEnded();
+            }
+          })();
+        }
+      }
+
+      function setPaused(next) {
+        if (!hasVideo) return;
+        if (next) {
+          try { video.pause(); } catch (e) {}
+          toggle.textContent = "Resume";
+        } else {
+          try {
+            var p = video.play();
+            if (p && p.catch) p.catch(function () {});
+          } catch (e) {}
+          toggle.textContent = "Pause";
+        }
+      }
+
+      toggle.addEventListener("click", function () {
+        setPaused(!video.paused ? true : false);
+      });
+      replay.addEventListener("click", start);
+
+      if (hasVideo) {
+        video.addEventListener("timeupdate", onTimeUpdate);
+        video.addEventListener("ended", onClipEnded);
+        video.addEventListener("playing", function () {
+          unfreeze();
+          toggle.textContent = "Pause";
+        });
+        video.addEventListener("pause", function () {
+          if (!finished) toggle.textContent = "Resume";
+        });
+      }
+
+      if (window.ResizeObserver && stage) {
+        new ResizeObserver(syncFlowHeight).observe(stage);
+      }
+      window.addEventListener("resize", syncFlowHeight);
+      syncFlowHeight();
+    }
+
+    var roots = document.querySelectorAll("[data-team-conversation]");
+    Array.prototype.forEach.call(roots, initTeam);
+  })();
+</script>
+
+    </d-article>
+  </body>
+</html>
