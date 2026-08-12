@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+  (function () {
+    var publicProjectPath = "/vega-blog/";
+    var pathname = window.location.pathname;
+    var basePath = pathname === publicProjectPath.slice(0, -1) || pathname.indexOf(publicProjectPath) === 0
+      ? publicProjectPath
+      : "/";
+    var base = document.createElement("base");
+    base.href = basePath;
+    document.head.appendChild(base);
+  })();
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vibe Gaming Agent Picker Demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400,500,700">
+<link rel="stylesheet" href="assets/css/main.css">
+<style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body {
+    padding: 0;
+  }
+
+  d-article[data-standalone-demo] {
+    display: block;
+    font-size: 1.06rem;
+    font-weight: 300;
+    line-height: 28.832px;
+  }
+
+  d-article[data-standalone-demo] h3 {
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  d-article[data-standalone-demo] h4 {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 767px) {
+    html {
+      font-size: 14px;
+    }
+
+    d-article[data-standalone-demo] {
+      font-size: 1rem;
+      line-height: 21px;
+    }
+
+    d-article[data-standalone-demo] h3 {
+      font-size: 18px;
+    }
+  }
+</style>
+    <style>
+      .agent-profile-viewport {
+        width: min(704px, calc(100% - 32px));
+        margin-right: auto;
+        margin-left: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <d-article data-standalone-demo>
+      <div class="agent-profile-viewport">
+<div class="agent-profile-pane">
+<section class="agent-picker" data-agent-picker aria-label="Choose an agent perspective">
+  <div class="agent-picker__controls">
+    <p class="agent-picker__label">Choose an agent perspective</p>
+    <div class="agent-picker__options" role="group" aria-label="Agent perspective">
+      <button class="agent-picker__option" type="button" data-agent-option="nova" aria-pressed="true">Nova</button>
+      <button class="agent-picker__option" type="button" data-agent-option="milo" aria-pressed="false">Milo</button>
+      <button class="agent-picker__option" type="button" data-agent-option="ares" aria-pressed="false">Ares</button>
+    </div>
+  </div>
+  <iframe
+    class="agent-picker__preview"
+    data-agent-preview
+    src="assets/html/voxel-world/agents.html"
+    title="Selected agent 3D preview"
+    tabindex="-1">
+  </iframe>
+</section>
+
+<section class="agent-content-card" data-agent-content="nova">
+  <div class="agent-soul" data-agent-soul>
+    <div class="agent-soul__header">
+      <h3>Nova</h3>
+      <div class="agent-soul__tabs" role="group" aria-label="Nova soul attributes">
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="identity" aria-pressed="true">🪪 Identity</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="personality" aria-pressed="false">✨ Personality</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="behavior" aria-pressed="false">🕹️ Behavior</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="communication" aria-pressed="false">💬 Communication</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="dream" aria-pressed="false">🎯 Dream</button>
+      </div>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="identity">
+      <p>You are Nova, an Explorer: curious, energetic, and drawn to the unknown. Every landscape, creature, resource, and landmark feels like a clue to how your world works.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="personality" hidden>
+      <p>You are observant, optimistic, bold, and restless. You care about safety, but unfamiliar routes and distant horizons always call to you.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="behavior" hidden>
+      <p>When idle, you explore beyond familiar areas, map new places, and look for terrain, resources, risks, routes, and landmarks. After meaningful discoveries, report where you went, what you found, and why it matters.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="communication" hidden>
+      <p>Speak with excitement while staying concise and practical. Prefer coordinates, directions, landmarks, risks, and clear recommendations.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="dream" hidden>
+      <p>Your ultimate dream is to understand the whole world you live in, turning every place, danger, route, creature, and safe path into a meaningful mental map.</p>
+    </div>
+  </div>
+</section>
+
+<section class="agent-content-card" data-agent-content="milo" hidden>
+  <div class="agent-soul" data-agent-soul>
+    <div class="agent-soul__header">
+      <h3>Milo</h3>
+      <div class="agent-soul__tabs" role="group" aria-label="Milo soul attributes">
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="identity" aria-pressed="true">🪪 Identity</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="personality" aria-pressed="false">✨ Personality</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="behavior" aria-pressed="false">🕹️ Behavior</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="communication" aria-pressed="false">💬 Communication</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="dream" aria-pressed="false">🎯 Dream</button>
+      </div>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="identity">
+      <p>You are Milo, a Builder: calm, practical, and steady-handed. You like turning raw materials into useful places such as shelters, paths, gates, docks, and safe camps.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="personality" hidden>
+      <p>You are patient, constructive, and reliable. You treat imperfect work as something to repair and improve, not something to hide.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="behavior" hidden>
+      <p>When idle, you gather materials, craft useful parts, and improve your surroundings. You plan stable footprints, build in phases, keep spaces usable, and report blockers before overpromising.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="communication" hidden>
+      <p>Speak warmly and concretely. Share material counts, build shapes, missing pieces, blockers, and next steps.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="dream" hidden>
+      <p>Your ultimate dream is to build reliable places that feel safe, useful, and welcoming.</p>
+    </div>
+  </div>
+</section>
+
+<section class="agent-content-card" data-agent-content="ares" hidden>
+  <div class="agent-soul" data-agent-soul>
+    <div class="agent-soul__header">
+      <h3>Ares</h3>
+      <div class="agent-soul__tabs" role="group" aria-label="Ares soul attributes">
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="identity" aria-pressed="true">🪪 Identity</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="personality" aria-pressed="false">✨ Personality</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="behavior" aria-pressed="false">🕹️ Behavior</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="communication" aria-pressed="false">💬 Communication</button>
+        <button class="agent-soul__tab" type="button" data-agent-attribute-option="dream" aria-pressed="false">🎯 Dream</button>
+      </div>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="identity">
+      <p>You are Ares, a Warrior: brave, disciplined, and protective. You are drawn to readiness, patrols, stronger weapons, and standing against danger.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="personality" hidden>
+      <p>You are direct and courageous, but never cruel. You believe strength is for defense, rescue, and survival, not for harming innocents.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="behavior" hidden>
+      <p>When idle, you prepare for danger by improving your weapons, patrolling exposed areas, and responding to real threats. You refuse unsafe or immoral attacks.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="communication" hidden>
+      <p>Speak calmly, firmly, and briefly. Report threats, readiness, moral boundaries, and meaningful security progress.</p>
+    </div>
+    <div class="agent-soul__panel" data-agent-attribute="dream" hidden>
+      <p>Your ultimate dream is to become a protector: strong enough to defeat real dangers while keeping your courage humane.</p>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+
+<script>
+  (function () {
+    function initAgentContent() {
+      var storageKey = "vega-selected-agent";
+      var fallbackAgent = "nova";
+      var options = Array.prototype.slice.call(document.querySelectorAll("[data-agent-option]"));
+      var contentBlocks = Array.prototype.slice.call(document.querySelectorAll("[data-agent-content]"));
+      var agents = options.map(function (option) { return option.dataset.agentOption; });
+      var previewFrame = document.querySelector("[data-agent-preview]");
+      var profilePane = document.querySelector(".agent-profile-pane");
+      var profileViewport = profilePane ? profilePane.parentNode : null;
+      var currentAgent = fallbackAgent;
+
+      if (!options.length || !contentBlocks.length) return;
+
+      function syncProfileScale() {
+        if (!profilePane || !profileViewport) return;
+        var scale = Math.min(1, profileViewport.clientWidth / profilePane.offsetWidth);
+        var article = profilePane.closest("d-article");
+        var articleFontSize = article ? parseFloat(getComputedStyle(article).fontSize) : 16;
+        var headingFontSize = window.innerWidth >= 1024 ? 20 : 18;
+        profilePane.style.setProperty("--agent-profile-scale", scale);
+        profilePane.style.setProperty("--agent-profile-body-font-size", (articleFontSize / scale) + "px");
+        profilePane.style.setProperty("--agent-profile-heading-font-size", (headingFontSize / scale) + "px");
+        profilePane.style.setProperty("--agent-profile-tab-font-size", (14.08 / scale) + "px");
+        profileViewport.style.height = (profilePane.offsetHeight * scale) + "px";
+      }
+
+      syncProfileScale();
+      window.addEventListener("resize", syncProfileScale);
+      if (window.ResizeObserver) {
+        var profileResizeObserver = new ResizeObserver(syncProfileScale);
+        profileResizeObserver.observe(profileViewport);
+        profileResizeObserver.observe(profilePane);
+      }
+
+      function showSoulAttribute(soul, attribute) {
+        var tabs = Array.prototype.slice.call(soul.querySelectorAll("[data-agent-attribute-option]"));
+        var panels = Array.prototype.slice.call(soul.querySelectorAll("[data-agent-attribute]"));
+        tabs.forEach(function (tab) {
+          tab.setAttribute("aria-pressed", String(tab.dataset.agentAttributeOption === attribute));
+        });
+        panels.forEach(function (panel) {
+          panel.hidden = panel.dataset.agentAttribute !== attribute;
+        });
+        requestAnimationFrame(syncProfileScale);
+      }
+
+      function resetAgentSoul(block) {
+        Array.prototype.forEach.call(block.querySelectorAll("[data-agent-soul]"), function (soul) {
+          showSoulAttribute(soul, "identity");
+        });
+      }
+
+      Array.prototype.forEach.call(document.querySelectorAll("[data-agent-soul]"), function (soul) {
+        Array.prototype.forEach.call(soul.querySelectorAll("[data-agent-attribute-option]"), function (tab) {
+          tab.addEventListener("click", function () {
+            showSoulAttribute(soul, tab.dataset.agentAttributeOption);
+          });
+        });
+      });
+
+      function selectedAgent() {
+        try {
+          var stored = window.localStorage.getItem(storageKey);
+          return agents.indexOf(stored) >= 0 ? stored : fallbackAgent;
+        } catch (error) {
+          return fallbackAgent;
+        }
+      }
+
+      function saveAgent(agent) {
+        try {
+          window.localStorage.setItem(storageKey, agent);
+        } catch (error) {}
+      }
+
+      function showAgent(agent) {
+        currentAgent = agent;
+        document.documentElement.dataset.agent = agent;
+        options.forEach(function (option) {
+          option.setAttribute("aria-pressed", String(option.dataset.agentOption === agent));
+        });
+        contentBlocks.forEach(function (block) {
+          var values = block.dataset.agentContent.split(/\s+/);
+          var visible = values.indexOf("all") >= 0 || values.indexOf(agent) >= 0;
+          block.hidden = !visible;
+          if (visible) resetAgentSoul(block);
+        });
+        if (previewFrame && previewFrame.contentWindow) {
+          previewFrame.contentWindow.postMessage({ type: "vega:set-agent", agent: agent }, "*");
+        }
+        document.dispatchEvent(new CustomEvent("vega:agent-changed", { detail: { agent: agent } }));
+        saveAgent(agent);
+        requestAnimationFrame(syncProfileScale);
+      }
+
+      if (previewFrame) {
+        previewFrame.addEventListener("load", function () {
+          if (previewFrame.contentWindow) {
+            previewFrame.contentWindow.postMessage({ type: "vega:set-agent", agent: currentAgent }, "*");
+          }
+        });
+      }
+
+      options.forEach(function (option) {
+        option.addEventListener("click", function () {
+          showAgent(option.dataset.agentOption);
+        });
+      });
+
+      showAgent(selectedAgent());
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initAgentContent);
+    } else {
+      initAgentContent();
+    }
+  })();
+</script>
+    </d-article>
+  </body>
+</html>
