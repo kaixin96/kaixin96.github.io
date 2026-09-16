@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;1,200;1,300;1,400;1,600&display=swap');
+
+html {
+  zoom: 120%;
+}
+
+a {
+  color: #0582ca;
+  text-decoration: none;
+}
+
+a:focus,
+a:hover {
+  color: #5fa8d3;
+  text-decoration: none;
+}
+
+body {
+  background-color: #ffffff;
+}
+
+sup {
+  vertical-align: text-top;
+}
+
+td,
+th,
+tr,
+p,
+a {
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+}
+
+strong {
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+heading {
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+}
+
+papertitle {
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+}
+
+name {
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 300;
+  font-size: 32px;
+}
+
+.one {
+  width: 160px;
+  height: 160px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.two {
+  width: 160px;
+  height: 160px;
+  position: absolute;
+  transition: opacity .5s ease-in-out;
+  -moz-transition: opacity .5s ease-in-out;
+  -webkit-transition: opacity .5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fade {
+  transition: opacity .2s ease-in-out;
+  -moz-transition: opacity .2s ease-in-out;
+  -webkit-transition: opacity .2s ease-in-out;
+}
+
+span.highlight {
+  background-color: #ffffd0;
+}
+
+iframe {
+  display: block;
+  margin: auto;
+}
+
+.tippy-box[data-theme~='portal'] {
+  background-color: #FDFFF5FA;
+  color: #696969FF;
+  border: 1px solid #CCCCCCFF;
+}
+
+.tippy-box[data-theme~='portal'][data-placement^='top']>.tippy-arrow::before {
+  border-top-color: #FDFFF5FA;
+}
+
+.tippy-box[data-theme~='portal'][data-placement^='bottom']>.tippy-arrow::before {
+  border-bottom-color: #FDFFF5FA;
+}
+
+.tippy-box[data-theme~='portal'][data-placement^='left']>.tippy-arrow::before {
+  border-left-color: #FDFFF5FA;
+}
+
+.tippy-box[data-theme~='portal'][data-placement^='right']>.tippy-arrow::before {
+  border-right-color: #FDFFF5FA;
+}

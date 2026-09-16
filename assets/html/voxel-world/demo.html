@@ -1,0 +1,1817 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voxel World Demo</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #dfe8ec;
+      font-family: Arial, sans-serif;
+    }
+
+    #scene {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+    }
+
+    .toolbar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .toolbar button {
+      width: 38px;
+      height: 34px;
+      border: 1px solid rgba(20, 24, 28, 0.18);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1b2730;
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(20, 24, 28, 0.12);
+    }
+
+    .toolbar button:hover,
+    .toolbar button:focus-visible {
+      background: #ffffff;
+      outline: none;
+    }
+
+    .caption {
+      position: absolute;
+      right: 12px;
+      bottom: 10px;
+      z-index: 2;
+      max-width: min(420px, calc(100% - 24px));
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.84);
+      color: rgba(18, 24, 32, 0.78);
+      font-size: 12px;
+      line-height: 1.35;
+      box-shadow: 0 3px 10px rgba(20, 24, 28, 0.1);
+      pointer-events: none;
+    }
+
+    .bubble {
+      position: absolute;
+      z-index: 3;
+      left: 0;
+      top: 0;
+      max-width: 220px;
+      padding: 8px 12px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.96);
+      color: #223042;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(20, 24, 28, 0.18);
+      transform: translate(-50%, calc(-100% - 12px));
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .bubble.is-visible {
+      opacity: 1;
+    }
+
+    .bubble::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -6px;
+      width: 12px;
+      height: 12px;
+      background: inherit;
+      transform: translateX(-50%) rotate(45deg);
+    }
+  </style>
+</head>
+<body>
+  <div id="scene" role="region" aria-label="Interactive voxel world">
+    <div class="toolbar" role="toolbar" aria-label="Voxel controls">
+      <button id="toggle" type="button" title="Play or pause" aria-label="Play or pause">&#10074;&#10074;</button>
+      <button id="reset" type="button" title="Reset camera" aria-label="Reset camera">&#8634;</button>
+    </div>
+    <div class="caption" id="caption">Loading voxel observation...</div>
+    <div class="bubble" id="bubble" aria-hidden="true"></div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js';
+    import { Line2 } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/lines/Line2.js';
+    import { LineMaterial } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/lines/LineMaterial.js';
+    import { LineGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/lines/LineGeometry.js';
+
+    const defaultMapUrl = '../../data/voxel-scenes/island.json';
+    const agentSkinUrl = '/assets/textures/mcl_core/character.png';
+    const AGENT_VIEW_DIR = [-0.863, 0.5, -0.498];
+    const params = new URLSearchParams(window.location.search);
+    const mapUrl = params.get('map') || defaultMapUrl;
+    const crackTextureUrl = params.get('crack') || '/assets/textures/mcl_core/crack_anylength.png';
+    const chromeless = params.get('ui') === 'off';
+    const skinUrl = params.get('skin') || agentSkinUrl;
+    const focusMode = params.get('focus');
+    const zoomLocked = params.get('zoomlock') === '1';
+    const motionEnabled = params.get('motion') !== 'off';
+    const digMode = params.get('dig') === '1';
+    const digStartDelay = Math.max(0, Number(params.get('digdelay') || 0));
+    const sayStartMode = params.get('saystart') || 'delay';
+    const sayStartDelay = Math.max(0, Number(params.get('saydelay') || 0));
+    const sayMessages = (params.get('say') || '')
+      .split('|')
+      .map((text) => text.trim())
+      .filter(Boolean);
+
+    const container = document.getElementById('scene');
+    const caption = document.getElementById('caption');
+    const toggleButton = document.getElementById('toggle');
+    const resetButton = document.getElementById('reset');
+    const bubble = document.getElementById('bubble');
+
+    if (chromeless) {
+      container.querySelector('.toolbar')?.remove();
+      caption?.remove();
+    }
+
+    const textureLoader = new THREE.TextureLoader();
+    const textureCache = new Map();
+
+    const blockFallbackColors = [
+      '#5f9f4b', '#8a5a32', '#7e8588', '#d6bd73', '#4f98c8', '#7b4b2a', '#3f7d42', '#b57a43'
+    ];
+
+    const materialPresets = [
+      { match: /leaves/i, roughness: 0.96, metalness: 0, opacity: 0.9 },
+      { match: /water/i, roughness: 0.28, metalness: 0, opacity: 0.72, transparent: true },
+      { match: /glass/i, roughness: 0.18, metalness: 0, opacity: 0.48, transparent: true },
+      { match: /stone|coal|iron/i, roughness: 0.9, metalness: 0.04 },
+      { match: /tree|wood|birch/i, roughness: 0.72, metalness: 0 },
+      { match: /dirt|grass/i, roughness: 0.88, metalness: 0 }
+    ];
+
+    const faces = [
+      { d: [1, 0, 0], c: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]], uv: [[0, 0], [0, 1], [1, 1], [1, 0]] },
+      { d: [-1, 0, 0], c: [[0, 0, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0]], uv: [[0, 0], [0, 1], [1, 1], [1, 0]] },
+      { d: [0, 1, 0], c: [[0, 1, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0]], uv: [[0, 0], [1, 0], [1, 1], [0, 1]] },
+      { d: [0, -1, 0], c: [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]], uv: [[0, 0], [1, 0], [1, 1], [0, 1]] },
+      { d: [0, 0, 1], c: [[1, 0, 1], [1, 1, 1], [0, 1, 1], [0, 0, 1]], uv: [[0, 0], [0, 1], [1, 1], [1, 0]] },
+      { d: [0, 0, -1], c: [[0, 0, 0], [0, 1, 0], [1, 1, 0], [1, 0, 0]], uv: [[0, 0], [0, 1], [1, 1], [1, 0]] }
+    ];
+
+    let world = new Map();
+    let blockTypes = {};
+    let bounds = null;
+    let homeCamera = null;
+    let playing = true;
+    let routeTime = 0;
+    let route = [];
+    let agent = null;
+    let followAgent = false;
+    let followTargetY = 0;
+    let idleTime = 0;
+    let idleBaseRotY = null;
+    let digType = null;
+    let digBlock = null;
+    let digTextureState = null;
+    let dcx = 0, dcy = 0, dcz = 0;
+    let digPhase = 'idle';
+    let digTime = 0;
+    let digWaitTotal = 0;
+    let digRoute = null;
+    let digRouteT = 0;
+    let digWalkDur = 1;
+    let walkCycle = 0;
+    let worldGroup = null;
+    let multiStarted = false;
+    let multiPhase = 'idle';
+    let multiPhaseTime = 0;
+    let multiDigBlock = null;
+    let multiDigTextureState = null;
+    let multiCameraFrom = null;
+    let multiCameraTo = null;
+    let multiTargetFrom = null;
+    let multiTargetTo = null;
+    let camZoomActive = false;
+    let camZoomT = 0;
+    const camZoomDur = 1;
+    const camZoomStartViewDist = 4;
+    const camZoomEndViewDist = 8;
+    let camZoomFromDist = 0;
+    let camZoomToDist = 0;
+    const camZoomDir = new THREE.Vector3();
+    const multiFillers = { lower: null, upper: null };
+    const peerAgents = [];
+    let tourStarted = false;
+    let tourDone = false;
+    let tourIndex = 0;
+    let tourSegT = 0;
+    let tourSegDuration = 0;
+    const tourCameraSpeed = 50;
+    let tourWaypoints = [];
+    let tourFromCam = null;
+    let tourFromTarget = null;
+    let tourHolding = false;
+    let tourHoldT = 0;
+    let finalZoomStarted = false;
+    let finalZoomActive = false;
+    let finalZoomT = 0;
+    const finalZoomDur = 4;
+    const finalZoomEndViewDist = 130;
+    let finalZoomFromDist = 0;
+    let finalZoomToDist = 0;
+    let finalZoomTarget = null;
+    let finalZoomFromCam = null;
+    let finalZoomToCam = null;
+    let finalZoomFromTarget = null;
+    const finalZoomDir = new THREE.Vector3();
+    const commArcs = [];
+    const extraAgents = [];
+    const shards = [];
+    const DIG_DUR = 1.7;
+    const segmentTime = 0.75;
+
+    const key = (x, y, z) => `${x},${y},${z}`;
+    const getBlock = (x, y, z) => world.get(key(x, y, z));
+
+    function occludesFaces(type) {
+      if (!type) return false;
+      const configured = blockTypes[type] || {};
+      const preset = materialPresets.find(({ match }) => match.test(type)) || {};
+      const opacity = configured.opacity ?? preset.opacity ?? 1;
+      return !(configured.transparent || preset.transparent || opacity < 1 || /leaves/i.test(type));
+    }
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xdfe8ec);
+
+    const camera = new THREE.PerspectiveCamera(46, container.clientWidth / container.clientHeight, 0.1, 300);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.zoomSpeed = 1.15;
+    controls.maxPolarAngle = Math.PI * 0.49;
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x7d8790, 2.1));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+    sun.position.set(18, 28, 14);
+    sun.castShadow = true;
+    scene.add(sun);
+
+    function colorForType(type) {
+      const configured = blockTypes[type]?.color;
+      if (configured) return configured;
+      let hash = 0;
+      for (let i = 0; i < type.length; i += 1) hash = (hash * 31 + type.charCodeAt(i)) >>> 0;
+      return blockFallbackColors[hash % blockFallbackColors.length];
+    }
+
+    function faceName(face) {
+      if (face.d[1] > 0) return 'top';
+      if (face.d[1] < 0) return 'bottom';
+      if (face.d[0] > 0) return 'east';
+      if (face.d[0] < 0) return 'west';
+      if (face.d[2] > 0) return 'south';
+      return 'north';
+    }
+
+    function textureForTypeFace(type, face) {
+      const configured = blockTypes[type] || {};
+      const textures = configured.textures || {};
+      const name = faceName(face);
+      return textures[name] || textures.side || textures.all || configured.texture || null;
+    }
+
+    function textureSpecKey(spec) {
+      if (!spec) return 'color';
+      if (typeof spec === 'string') return resolveAssetUrl(spec);
+      return JSON.stringify(spec);
+    }
+
+    function resolveAssetUrl(url) {
+      return new URL(url, window.location.href).href;
+    }
+
+    function configureTexture(texture) {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestMipmapNearestFilter;
+      texture.wrapS = THREE.ClampToEdgeWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
+      texture.needsUpdate = true;
+      return texture;
+    }
+
+    async function loadTexture(url) {
+      const resolved = resolveAssetUrl(url);
+      if (textureCache.has(resolved)) return textureCache.get(resolved);
+      const promise = textureLoader.loadAsync(resolved).then((texture) => {
+        textureCache.set(resolved, configureTexture(texture));
+        return textureCache.get(resolved);
+      });
+      textureCache.set(resolved, promise);
+      return promise;
+    }
+
+    function drawLayer(ctx, image, color) {
+      const layerCanvas = document.createElement('canvas');
+      layerCanvas.width = image.width;
+      layerCanvas.height = image.height;
+      const layerCtx = layerCanvas.getContext('2d');
+      layerCtx.imageSmoothingEnabled = false;
+      layerCtx.drawImage(image, 0, 0);
+
+      if (color && color !== 'white' && color !== '#ffffff') {
+        layerCtx.globalCompositeOperation = 'multiply';
+        layerCtx.fillStyle = color;
+        layerCtx.fillRect(0, 0, layerCanvas.width, layerCanvas.height);
+        layerCtx.globalCompositeOperation = 'destination-in';
+        layerCtx.drawImage(image, 0, 0);
+        layerCtx.globalCompositeOperation = 'source-over';
+      }
+
+      ctx.drawImage(layerCanvas, 0, 0);
+    }
+
+    async function composeTexture(spec) {
+      const layers = spec.layers || [];
+      if (!layers.length) return null;
+      const textures = await Promise.all(layers.map((layer) => loadTexture(layer.texture)));
+      const width = textures[0].image.width;
+      const height = textures[0].image.height;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+
+      layers.forEach((layer, index) => drawLayer(ctx, textures[index].image, layer.color));
+      return configureTexture(new THREE.CanvasTexture(canvas));
+    }
+
+    async function loadTextureSpec(spec) {
+      if (!spec) return null;
+      if (typeof spec === 'string') return loadTexture(spec);
+      const key = textureSpecKey(spec);
+      if (textureCache.has(key)) return textureCache.get(key);
+      const promise = composeTexture(spec).then((texture) => {
+        textureCache.set(key, texture);
+        return texture;
+      });
+      textureCache.set(key, promise);
+      return promise;
+    }
+
+    function collectTextureSpecs() {
+      const specs = [];
+      for (const type of Object.keys(blockTypes)) {
+        const configured = blockTypes[type] || {};
+        if (configured.texture) specs.push(configured.texture);
+        for (const spec of Object.values(configured.textures || {})) specs.push(spec);
+      }
+      return specs;
+    }
+
+    async function loadConfiguredTextures() {
+      const specsByKey = new Map();
+      for (const spec of collectTextureSpecs()) specsByKey.set(textureSpecKey(spec), spec);
+      await Promise.all([...specsByKey.values()].map((spec) => loadTextureSpec(spec)));
+    }
+
+    function materialOptionsForType(type, texture) {
+      const configured = blockTypes[type] || {};
+      const preset = materialPresets.find(({ match }) => match.test(type)) || {};
+      const opacity = configured.opacity ?? preset.opacity ?? 1;
+
+      return {
+        color: texture ? '#ffffff' : colorForType(type),
+        vertexColors: true,
+        map: texture || null,
+        roughness: configured.roughness ?? preset.roughness ?? 0.84,
+        metalness: configured.metalness ?? preset.metalness ?? 0.02,
+        emissive: configured.emissive ?? preset.emissive ?? '#000000',
+        emissiveIntensity: configured.emissiveIntensity ?? preset.emissiveIntensity ?? 0,
+        transparent: Boolean(configured.transparent ?? preset.transparent ?? opacity < 1),
+        opacity,
+        alphaTest: texture && /leaves/i.test(type) ? 0.35 : 0,
+        side: THREE.FrontSide
+      };
+    }
+
+    function faceColorForType(type, face, x, y, z, textured) {
+      const color = textured ? new THREE.Color('#ffffff') : new THREE.Color(colorForType(type));
+      const verticalShade = face.d[1] > 0 ? 1.16 : face.d[1] < 0 ? 0.56 : 0.86;
+      const sideShade = face.d[0] > 0 || face.d[2] < 0 ? 0.96 : 0.78;
+      const hash = Math.sin((x * 12.9898 + y * 78.233 + z * 37.719) * 0.01) * 43758.5453;
+      const variation = 0.94 + (hash - Math.floor(hash)) * 0.12;
+      color.multiplyScalar(verticalShade * (face.d[1] === 0 ? sideShade : 1) * variation);
+      return color;
+    }
+
+    function loadWorld(voxels) {
+      world = new Map();
+      bounds = {
+        minX: Infinity,
+        minY: Infinity,
+        minZ: Infinity,
+        maxX: -Infinity,
+        maxY: -Infinity,
+        maxZ: -Infinity
+      };
+
+      for (const voxel of voxels) {
+        const [x, y, z, type] = voxel;
+        if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number' || !type) continue;
+        world.set(key(x, y, z), type);
+        bounds.minX = Math.min(bounds.minX, x);
+        bounds.minY = Math.min(bounds.minY, y);
+        bounds.minZ = Math.min(bounds.minZ, z);
+        bounds.maxX = Math.max(bounds.maxX, x);
+        bounds.maxY = Math.max(bounds.maxY, y);
+        bounds.maxZ = Math.max(bounds.maxZ, z);
+      }
+
+      if (!world.size) throw new Error('Voxel map contains no renderable blocks.');
+    }
+
+    function createBucket() {
+      return {
+        positions: [],
+        normals: [],
+        colors: [],
+        uvs: [],
+        indices: [],
+        vertexIndex: 0,
+        type: null,
+        textureSpec: null
+      };
+    }
+
+    function buildVoxelMeshes() {
+      const buckets = new Map();
+      let faceCount = 0;
+
+      for (const [coord, type] of world) {
+        const [x, y, z] = coord.split(',').map(Number);
+        for (const face of faces) {
+          if (occludesFaces(getBlock(x + face.d[0], y + face.d[1], z + face.d[2]))) continue;
+          const textureSpec = textureForTypeFace(type, face);
+          const bucketKey = `${type}|${textureSpecKey(textureSpec)}`;
+          if (!buckets.has(bucketKey)) {
+            const bucket = createBucket();
+            bucket.type = type;
+            bucket.textureSpec = textureSpec;
+            buckets.set(bucketKey, bucket);
+          }
+          const bucket = buckets.get(bucketKey);
+          const color = faceColorForType(type, face, x, y, z, Boolean(textureSpec));
+          for (const corner of face.c) {
+            bucket.positions.push(x + corner[0], y + corner[1], z + corner[2]);
+            bucket.normals.push(...face.d);
+            bucket.colors.push(color.r, color.g, color.b);
+          }
+          for (const uv of face.uv) bucket.uvs.push(uv[0], uv[1]);
+          bucket.indices.push(
+            bucket.vertexIndex,
+            bucket.vertexIndex + 1,
+            bucket.vertexIndex + 2,
+            bucket.vertexIndex,
+            bucket.vertexIndex + 2,
+            bucket.vertexIndex + 3
+          );
+          bucket.vertexIndex += 4;
+          faceCount += 1;
+        }
+      }
+
+      const group = new THREE.Group();
+      for (const bucket of buckets.values()) {
+        if (!bucket.positions.length) continue;
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(bucket.positions, 3));
+        geometry.setAttribute('normal', new THREE.Float32BufferAttribute(bucket.normals, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(bucket.colors, 3));
+        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(bucket.uvs, 2));
+        geometry.setIndex(bucket.indices);
+        geometry.computeBoundingSphere();
+
+        const texture = bucket.textureSpec ? textureCache.get(textureSpecKey(bucket.textureSpec)) : null;
+        const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial(materialOptionsForType(bucket.type, texture)));
+        mesh.name = bucket.type;
+        mesh.receiveShadow = true;
+        mesh.castShadow = true;
+        group.add(mesh);
+      }
+
+      group.userData.faceCount = faceCount;
+      group.userData.meshCount = group.children.length;
+      return group;
+    }
+
+    function skinUv(rect) {
+      const atlasWidth = 64;
+      const atlasHeight = 32;
+      const [x, y, width, height] = rect;
+      const u0 = x / atlasWidth;
+      const u1 = (x + width) / atlasWidth;
+      const v0 = 1 - (y + height) / atlasHeight;
+      const v1 = 1 - y / atlasHeight;
+      return [[u0, v0], [u0, v1], [u1, v1], [u1, v0]];
+    }
+
+    function createSkinBox(width, height, depth, rects) {
+      const halfWidth = width / 2;
+      const halfDepth = depth / 2;
+      const faceSpecs = [
+        { name: 'right', normal: [1, 0, 0], corners: [[halfWidth, 0, -halfDepth], [halfWidth, height, -halfDepth], [halfWidth, height, halfDepth], [halfWidth, 0, halfDepth]] },
+        { name: 'left', normal: [-1, 0, 0], corners: [[-halfWidth, 0, halfDepth], [-halfWidth, height, halfDepth], [-halfWidth, height, -halfDepth], [-halfWidth, 0, -halfDepth]] },
+        { name: 'top', normal: [0, 1, 0], corners: [[-halfWidth, height, halfDepth], [halfWidth, height, halfDepth], [halfWidth, height, -halfDepth], [-halfWidth, height, -halfDepth]] },
+        { name: 'bottom', normal: [0, -1, 0], corners: [[-halfWidth, 0, -halfDepth], [halfWidth, 0, -halfDepth], [halfWidth, 0, halfDepth], [-halfWidth, 0, halfDepth]] },
+        { name: 'front', normal: [0, 0, 1], corners: [[halfWidth, 0, halfDepth], [halfWidth, height, halfDepth], [-halfWidth, height, halfDepth], [-halfWidth, 0, halfDepth]] },
+        { name: 'back', normal: [0, 0, -1], corners: [[-halfWidth, 0, -halfDepth], [-halfWidth, height, -halfDepth], [halfWidth, height, -halfDepth], [halfWidth, 0, -halfDepth]] }
+      ];
+
+      const positions = [];
+      const normals = [];
+      const uvs = [];
+      const indices = [];
+      let vertexIndex = 0;
+
+      for (const face of faceSpecs) {
+        const faceUv = skinUv(rects[face.name]);
+        for (let index = 0; index < 4; index += 1) {
+          positions.push(...face.corners[index]);
+          normals.push(...face.normal);
+          uvs.push(...faceUv[index]);
+        }
+        indices.push(vertexIndex, vertexIndex + 1, vertexIndex + 2, vertexIndex, vertexIndex + 2, vertexIndex + 3);
+        vertexIndex += 4;
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+      geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      geometry.setIndex(indices);
+      geometry.computeBoundingSphere();
+      return geometry;
+    }
+
+    function makeSkinPart(width, height, depth, rects, material, position) {
+      const mesh = new THREE.Mesh(createSkinBox(width, height, depth, rects), material);
+      mesh.position.copy(position);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+
+    function makePivotedSkinPart(width, height, depth, rects, material, pivotPosition) {
+      const pivot = new THREE.Group();
+      pivot.position.copy(pivotPosition);
+      const mesh = makeSkinPart(width, height, depth, rects, material, new THREE.Vector3(0, -height, 0));
+      pivot.add(mesh);
+      return pivot;
+    }
+
+    function relaxRotation(pivot, amount = 0.72) {
+      if (!pivot) return;
+      pivot.rotation.x *= amount;
+      pivot.rotation.z *= amount;
+    }
+
+    function makeAgent(position, skinTextureOverride) {
+      const group = new THREE.Group();
+      const skinTexture = skinTextureOverride || textureCache.get(resolveAssetUrl(skinUrl));
+      const skinMaterial = new THREE.MeshStandardMaterial({ map: skinTexture, roughness: 0.78, metalness: 0, alphaTest: 0.1 });
+      const headRects = {
+        top: [8, 0, 8, 8],
+        bottom: [16, 0, 8, 8],
+        right: [0, 8, 8, 8],
+        front: [8, 8, 8, 8],
+        left: [16, 8, 8, 8],
+        back: [24, 8, 8, 8]
+      };
+      const bodyRects = {
+        top: [20, 16, 8, 4],
+        bottom: [28, 16, 8, 4],
+        right: [16, 20, 4, 12],
+        front: [20, 20, 8, 12],
+        left: [28, 20, 4, 12],
+        back: [32, 20, 8, 12]
+      };
+      const armRects = {
+        top: [44, 16, 4, 4],
+        bottom: [48, 16, 4, 4],
+        right: [40, 20, 4, 12],
+        front: [44, 20, 4, 12],
+        left: [48, 20, 4, 12],
+        back: [52, 20, 4, 12]
+      };
+      const legRects = {
+        top: [4, 16, 4, 4],
+        bottom: [8, 16, 4, 4],
+        right: [0, 20, 4, 12],
+        front: [4, 20, 4, 12],
+        left: [8, 20, 4, 12],
+        back: [12, 20, 4, 12]
+      };
+
+      const cellSize = 0.05625;
+      const headSize = cellSize * 8;
+      const torsoHeight = cellSize * 12;
+      const legHeight = cellSize * 12;
+      const torsoWidth = cellSize * 8;
+      const limbWidth = cellSize * 4;
+      const bodyDepth = cellSize * 4;
+      const shoulderX = torsoWidth / 2 + limbWidth / 2;
+      const legX = limbWidth / 2;
+
+      const headBaseY = legHeight + torsoHeight;
+      const body = makeSkinPart(torsoWidth, torsoHeight, bodyDepth, bodyRects, skinMaterial, new THREE.Vector3(0, legHeight, 0));
+      const head = makeSkinPart(headSize, headSize, headSize, headRects, skinMaterial, new THREE.Vector3(0, headBaseY, 0));
+      group.add(body);
+      group.add(head);
+      const leftArm = makePivotedSkinPart(limbWidth, torsoHeight, bodyDepth, armRects, skinMaterial, new THREE.Vector3(-shoulderX, legHeight + torsoHeight, 0));
+      const rightArm = makePivotedSkinPart(limbWidth, torsoHeight, bodyDepth, armRects, skinMaterial, new THREE.Vector3(shoulderX, legHeight + torsoHeight, 0));
+      const leftLeg = makePivotedSkinPart(limbWidth, legHeight, bodyDepth, legRects, skinMaterial, new THREE.Vector3(-legX, legHeight, 0));
+      const rightLeg = makePivotedSkinPart(limbWidth, legHeight, bodyDepth, legRects, skinMaterial, new THREE.Vector3(legX, legHeight, 0));
+      group.add(leftArm);
+      group.add(rightArm);
+      group.add(leftLeg);
+      group.add(rightLeg);
+      group.userData.head = head;
+      group.userData.headBaseY = headBaseY;
+      group.userData.leftArm = leftArm;
+      group.userData.rightArm = rightArm;
+      group.userData.leftLeg = leftLeg;
+      group.userData.rightLeg = rightLeg;
+      group.position.copy(position);
+      return group;
+    }
+
+    function groundSurfaceYAt(x, z, fallbackY) {
+      let surfaceY = -Infinity;
+      for (const coord of world.keys()) {
+        const [blockX, blockY, blockZ] = coord.split(',').map(Number);
+        if (Math.abs(blockX + 0.5 - x) <= 0.75 && Math.abs(blockZ + 0.5 - z) <= 0.75 && blockY + 1 <= fallbackY + 1.25) {
+          surfaceY = Math.max(surfaceY, blockY + 1);
+        }
+      }
+      return Number.isFinite(surfaceY) ? surfaceY : fallbackY;
+    }
+
+    function positionFromMap(map) {
+      const position = map.agent?.position || map.source?.position;
+      if (position && typeof position.x === 'number' && typeof position.y === 'number' && typeof position.z === 'number') {
+        return new THREE.Vector3(position.x, groundSurfaceYAt(position.x, position.z, position.y), position.z);
+      }
+      return new THREE.Vector3(
+        (bounds.minX + bounds.maxX + 1) / 2,
+        bounds.maxY + 1,
+        (bounds.minZ + bounds.maxZ + 1) / 2
+      );
+    }
+
+    function pathFromMap(map) {
+      if (!Array.isArray(map.path)) return [];
+      return map.path
+        .filter((point) => Array.isArray(point) && point.length >= 3)
+        .map(([x, y, z]) => new THREE.Vector3(x, groundSurfaceYAt(x, z, y), z));
+    }
+
+    function configureCamera() {
+      const center = new THREE.Vector3(
+        (bounds.minX + bounds.maxX + 1) / 2,
+        (bounds.minY + bounds.maxY + 1) / 2,
+        (bounds.minZ + bounds.maxZ + 1) / 2
+      );
+      const spanX = bounds.maxX - bounds.minX + 1;
+      const spanY = bounds.maxY - bounds.minY + 1;
+      const spanZ = bounds.maxZ - bounds.minZ + 1;
+      const radius = Math.max(spanX, spanY, spanZ);
+
+      const focusAgent = focusMode === 'agent' && agent;
+      followAgent = Boolean(focusAgent);
+      const target = focusAgent
+        ? new THREE.Vector3(agent.position.x, agent.position.y + 0.9, agent.position.z)
+        : center;
+      followTargetY = target.y;
+      const viewDist = focusAgent ? camZoomStartViewDist : radius;
+      const dir = focusAgent ? AGENT_VIEW_DIR : [1.45, 1.25, 1.75];
+      homeCamera = new THREE.Vector3(
+        target.x + viewDist * dir[0],
+        target.y + viewDist * dir[1],
+        target.z + viewDist * dir[2]
+      );
+
+      camera.position.copy(homeCamera);
+      camera.near = 0.1;
+      camera.far = Math.max(120, radius * 12);
+      camera.updateProjectionMatrix();
+      controls.target.copy(target);
+      controls.minDistance = focusAgent ? 2 : Math.max(3, radius * 0.38);
+      controls.maxDistance = focusAgent ? Math.max(40, radius * 4) : Math.max(30, radius * 6);
+      controls.enableZoom = !zoomLocked;
+      scene.fog = new THREE.Fog(0xdfe8ec, radius * 4, radius * 8);
+      controls.update();
+    }
+
+    function idleAnimate(delta) {
+      idleTime += delta;
+      const t = idleTime;
+      const a = agent.userData;
+      if (idleBaseRotY === null) idleBaseRotY = agent.rotation.y;
+      agent.rotation.y = idleBaseRotY + Math.sin(t * 0.42) * 0.06;
+      if (a.head) a.head.rotation.y = Math.sin(t * 0.8) * 0.08;
+      if (a.leftArm) a.leftArm.rotation.x = 0.18 + Math.sin(t * 1.6) * 0.06;
+      if (a.rightArm) a.rightArm.rotation.x = -0.18 - Math.sin(t * 1.6) * 0.06;
+      if (a.leftLeg) a.leftLeg.rotation.x = 0;
+      if (a.rightLeg) a.rightLeg.rotation.x = 0;
+    }
+
+    // --- one-shot dig sequence ------------------------------------------
+    function materialForType(type) {
+      const cfg = blockTypes[type] || {};
+      const spec = (cfg.textures && (cfg.textures.side || cfg.textures.all)) || cfg.texture;
+      let map = null;
+      if (spec) {
+        const tx = textureCache.get(textureSpecKey(spec));
+        if (tx && tx.isTexture) map = tx;
+      }
+      return new THREE.MeshStandardMaterial({
+        map,
+        color: map ? '#ffffff' : colorForType(type),
+        roughness: 0.85, metalness: 0
+      });
+    }
+
+    function createDigTexture(type) {
+      const crackTexture = textureCache.get(resolveAssetUrl(crackTextureUrl));
+      if (!crackTexture?.image) return null;
+      const frameSize = crackTexture.image.width;
+      const frameCount = Math.max(1, Math.floor(crackTexture.image.height / frameSize));
+      // BoxGeometry material order: +X, -X, +Y, -Y, +Z, -Z. Resolve each face's
+      // base texture exactly like the world mesh so top/bottom/side all match.
+      const boxDirs = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+      let hasBase = false;
+      const faceStates = boxDirs.map((d) => {
+        const spec = textureForTypeFace(type, { d });
+        const baseTex = spec ? textureCache.get(textureSpecKey(spec)) : null;
+        const baseImg = (baseTex && baseTex.image) ? baseTex.image : null;
+        if (baseImg) hasBase = true;
+        const canvas = document.createElement('canvas');
+        canvas.width = baseImg ? baseImg.width : 16;
+        canvas.height = baseImg ? baseImg.height : 16;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        const texture = configureTexture(new THREE.CanvasTexture(canvas));
+        const material = new THREE.MeshStandardMaterial({
+          map: texture,
+          color: baseImg ? '#ffffff' : colorForType(type),
+          roughness: 0.85,
+          metalness: 0
+        });
+        return { baseImg, baseColor: baseImg ? null : colorForType(type), canvas, ctx, texture, material };
+      });
+      if (!hasBase) return null;
+      return {
+        crack: crackTexture.image,
+        frameSize,
+        frameCount,
+        frameIndex: null,
+        faces: faceStates,
+        materials: faceStates.map((f) => f.material)
+      };
+    }
+
+    function updateDigTexture(progress) {
+      updateDigTextureForState(digTextureState, progress);
+    }
+
+    function disposeDigState(state) {
+      if (!state) return;
+      for (const face of state.faces) {
+        face.texture.dispose();
+        face.material.dispose();
+      }
+    }
+
+    function planDig(agentX, agentZ) {
+      let best = null, bestD = Infinity;
+      for (const [k, type] of world) {
+        if (type !== 'mcl_core:tree' && type !== 'mcl_core:birchtree') continue;
+        const [x, y, z] = k.split(',').map(Number);
+        const d = (x + 0.5 - agentX) ** 2 + (z + 0.5 - agentZ) ** 2;
+        if (d < bestD) { bestD = d; best = { tx: x, ty: y, tz: z, type }; }
+      }
+      if (!best) return null;
+      const ys = [];
+      for (const [k, type] of world) {
+        if (type !== best.type) continue;
+        const [x, y, z] = k.split(',').map(Number);
+        if (x === best.tx && z === best.tz) ys.push(y);
+      }
+      ys.sort((a, b) => a - b);
+      const base = ys[0];
+      const desired = base + 1;                 // one block above ground, clearly visible
+      let chosen = ys[0];
+      for (const y of ys) {
+        if (Math.abs(y - desired) < Math.abs(chosen - desired)) chosen = y;
+      }
+      best.ty = chosen;
+      return best;
+    }
+
+    function setupDig(info) {
+      digType = info.type;
+      dcx = info.tx + 0.5; dcy = info.ty + 0.5; dcz = info.tz + 0.5;
+      digTextureState = createDigTexture(digType);
+      const material = digTextureState ? digTextureState.materials : materialForType(digType);
+      if (digTextureState) updateDigTexture(0);
+      digBlock = new THREE.Mesh(new THREE.BoxGeometry(1.02, 1.02, 1.02), material);
+      digBlock.position.set(dcx, dcy, dcz);
+      digBlock.castShadow = true; digBlock.receiveShadow = true;
+      scene.add(digBlock);
+
+      const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      let cell = null, cd = Infinity;
+      for (const [dx, dz] of nb) {
+        const nx = info.tx + dx, nz = info.tz + dz;
+        const gy = groundSurfaceYAt(nx + 0.5, nz + 0.5, info.ty);
+        if (!isFinite(gy)) continue;
+        const d = (nx + 0.5 - agent.position.x) ** 2 + (nz + 0.5 - agent.position.z) ** 2;
+        if (d < cd) { cd = d; cell = new THREE.Vector3(nx + 0.5, gy, nz + 0.5); }
+      }
+      const stand = cell || agent.position.clone();
+      digRoute = [agent.position.clone(), stand];
+      digWalkDur = Math.max(0.6, Math.hypot(stand.x - agent.position.x, stand.z - agent.position.z) / 2.2);
+      // Start already facing the walk/dig target so there is no initial turn-around.
+      const wdx = stand.x - agent.position.x;
+      const wdz = stand.z - agent.position.z;
+      if (wdx * wdx + wdz * wdz > 1e-6) {
+        agent.rotation.y = Math.atan2(wdx, wdz);
+      } else {
+        const ddx = dcx - agent.position.x;
+        const ddz = dcz - agent.position.z;
+        if (ddx * ddx + ddz * ddz > 1e-6) agent.rotation.y = Math.atan2(ddx, ddz);
+      }
+      digRouteT = 0;
+      walkCycle = 0;
+      digTime = digStartDelay;
+      digWaitTotal = digStartDelay;
+      digPhase = digStartDelay > 0 ? 'wait' : 'walk';
+    }
+
+    function faceDigTarget() {
+      const dx = dcx - agent.position.x;
+      const dz = dcz - agent.position.z;
+      if (dx * dx + dz * dz > 1e-6) agent.rotation.y = Math.atan2(dx, dz);
+    }
+
+    function spawnShards(centerY = dcy) {
+      for (let i = 0; i < 10; i += 1) {
+        const s = 0.14 + Math.random() * 0.08;
+        const m = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), materialForType(digType));
+        m.position.set(dcx + (Math.random() - 0.5) * 0.4, centerY + (Math.random() - 0.5) * 0.4, dcz + (Math.random() - 0.5) * 0.4);
+        m.userData.v = new THREE.Vector3((Math.random() - 0.5) * 3, 2 + Math.random() * 2.5, (Math.random() - 0.5) * 3);
+        m.userData.life = 0.6 + Math.random() * 0.3;
+        m.castShadow = true;
+        scene.add(m);
+        shards.push(m);
+      }
+    }
+
+    function updateShards(delta) {
+      for (let i = shards.length - 1; i >= 0; i -= 1) {
+        const m = shards[i];
+        m.userData.v.y -= 12 * delta;
+        m.position.addScaledVector(m.userData.v, delta);
+        m.rotation.x += delta * 6; m.rotation.z += delta * 4;
+        m.scale.multiplyScalar(0.93);
+        m.userData.life -= delta;
+        if (m.userData.life <= 0) {
+          scene.remove(m); m.geometry.dispose(); m.material.dispose();
+          shards.splice(i, 1);
+        }
+      }
+    }
+
+    function breakDigBlock() {
+      if (digBlock) {
+        scene.remove(digBlock);
+        digBlock.geometry.dispose();
+        if (digTextureState) disposeDigState(digTextureState);
+        else if (digBlock.material.dispose) digBlock.material.dispose();
+        digTextureState = null;
+        digBlock = null;
+      }
+      spawnShards();
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'vibe:digComplete' }, '*');
+      }
+    }
+
+    function removeMultiDigBlock() {
+      if (!multiDigBlock) return;
+      scene.remove(multiDigBlock);
+      multiDigBlock.geometry.dispose();
+      if (multiDigTextureState) disposeDigState(multiDigTextureState);
+      else if (multiDigBlock.material.dispose) multiDigBlock.material.dispose();
+      multiDigTextureState = null;
+      multiDigBlock = null;
+    }
+
+    function makeDigCube(x, y, z, type) {
+      const state = createDigTexture(type);
+      const material = state ? state.materials : materialForType(type);
+      if (state) updateDigTextureForState(state, 0);
+      const cube = new THREE.Mesh(new THREE.BoxGeometry(1.02, 1.02, 1.02), material);
+      cube.position.set(x + 0.5, y + 0.5, z + 0.5);
+      cube.castShadow = true;
+      cube.receiveShadow = true;
+      return { cube, state, type, x, y, z };
+    }
+
+    function beginMultiDig(which, x, y, z) {
+      removeMultiDigBlock();
+      const filler = multiFillers[which];
+      if (filler) {
+        // Reuse the standalone cube that has been standing in for this voxel;
+        // no world rebuild required, so the zoom-out stays smooth.
+        multiDigBlock = filler.cube;
+        multiDigTextureState = filler.state;
+        multiFillers[which] = null;
+        return;
+      }
+      // Fallback: this position had no voxel at init; show a transient crack cube.
+      const built = makeDigCube(x, y, z, digType);
+      multiDigBlock = built.cube;
+      multiDigTextureState = built.state;
+      scene.add(multiDigBlock);
+    }
+
+    function updateDigTextureForState(state, progress) {
+      if (!state) return;
+      const p = Math.max(0, Math.min(1, progress));
+      const frameIndex = p <= 0 ? -1 : Math.min(state.frameCount - 1, Math.floor(p * state.frameCount));
+      if (state.frameIndex === frameIndex) return;
+      for (const face of state.faces) {
+        const { baseImg, baseColor, canvas, ctx, texture } = face;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (baseImg) {
+          ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
+        } else {
+          ctx.fillStyle = baseColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        if (frameIndex >= 0) {
+          ctx.drawImage(state.crack, 0, frameIndex * state.frameSize, state.frameSize, state.frameSize, 0, 0, canvas.width, canvas.height);
+        }
+        texture.needsUpdate = true;
+      }
+      state.frameIndex = frameIndex;
+    }
+
+    function setAgentOpacity(agentLike, opacity) {
+      const alpha = Math.max(0, Math.min(1, opacity));
+      agentLike.traverse((node) => {
+        if (!node.isMesh || !node.material) return;
+        node.material.transparent = true;
+        node.material.opacity = alpha;
+      });
+    }
+
+    function startMultiSequence() {
+      if (multiStarted) return;
+      if (!digMode || !digType) return;
+      multiStarted = true;
+      multiPhase = 'settle';
+      multiPhaseTime = 0;
+    }
+
+    function lookHeadAt(targetCenterY, delta) {
+      const a = agent.userData;
+      if (!a.head) return;
+      const eyeY = agent.position.y + (a.headBaseY || 1.3) + 0.22;
+      const dist = Math.max(0.35, Math.hypot(dcx - agent.position.x, dcz - agent.position.z));
+      const pitch = Math.max(-1.0, Math.min(1.0, Math.atan2(eyeY - targetCenterY, dist)));
+      a.head.rotation.x += (pitch - a.head.rotation.x) * Math.min(1, delta * 8);
+      a.head.rotation.y += (0 - a.head.rotation.y) * Math.min(1, delta * 8);
+    }
+
+    function updateMulti(delta) {
+      if (!multiStarted || multiPhase === 'done') return;
+      multiPhaseTime += delta;
+      const a = agent.userData;
+      faceDigTarget();
+
+      const bx = Math.round(dcx - 0.5);
+      const by = Math.round(dcy - 0.5);
+      const bz = Math.round(dcz - 0.5);
+
+      if (multiPhase === 'settle') {
+        if (a.leftLeg) a.leftLeg.rotation.x = 0;
+        if (a.rightLeg) a.rightLeg.rotation.x = 0;
+        if (a.leftArm) a.leftArm.rotation.x = 0.08;
+        if (a.rightArm) a.rightArm.rotation.x = -0.15;
+        lookHeadAt(dcy - 1, delta);
+        if (multiPhaseTime >= 0.4) {
+          multiPhase = 'dig-lower';
+          multiPhaseTime = 0;
+          beginMultiDig('lower', bx, by - 1, bz);
+          startCameraZoom();
+        }
+      } else if (multiPhase === 'gap') {
+        if (a.rightArm) a.rightArm.rotation.x = -0.16;
+        if (a.leftArm) a.leftArm.rotation.x = 0.1;
+        lookHeadAt(dcy + 1, delta);
+        if (multiPhaseTime >= 0.5) {
+          multiPhase = 'dig-upper';
+          multiPhaseTime = 0;
+          beginMultiDig('upper', bx, by + 1, bz);
+        }
+      } else if (multiPhase === 'dig-lower' || multiPhase === 'dig-upper') {
+        const progress = Math.min(1, multiPhaseTime / DIG_DUR);
+        if (a.rightArm) a.rightArm.rotation.x = -0.4 - (Math.sin(multiPhaseTime * 11) * 0.5 + 0.5) * 1.9;
+        if (a.leftArm) a.leftArm.rotation.x = 0.12;
+        lookHeadAt(multiPhase === 'dig-lower' ? dcy - 1 : dcy + 1, delta);
+        if (multiDigBlock) updateDigTextureForState(multiDigTextureState, progress);
+        if (progress >= 1) {
+          const centerY = multiPhase === 'dig-lower' ? dcy - 1 : dcy + 1;
+          spawnShards(centerY);
+          removeMultiDigBlock();
+          if (multiPhase === 'dig-lower') {
+            multiPhase = 'gap';
+            multiPhaseTime = 0;
+          } else {
+            multiPhase = 'done';
+            if (a.rightArm) a.rightArm.rotation.x = -0.16;
+            if (a.head) a.head.rotation.x = 0;
+            idleTime = 0;
+          }
+        }
+      }
+
+      updateShards(delta);
+    }
+
+    function digUpdate(delta) {
+      const a = agent.userData;
+      if (digPhase === 'wait') {
+        const dx = digRoute[1].x - agent.position.x;
+        const dz = digRoute[1].z - agent.position.z;
+        if (dx * dx + dz * dz > 1e-6) {
+          const targetYaw = Math.atan2(dx, dz);
+          let yawDelta = targetYaw - agent.rotation.y;
+          while (yawDelta > Math.PI) yawDelta -= Math.PI * 2;
+          while (yawDelta < -Math.PI) yawDelta += Math.PI * 2;
+          agent.rotation.y += yawDelta * Math.min(1, delta * 6.5);
+        }
+        if (a.head) a.head.rotation.y = 0;
+        if (a.leftArm) a.leftArm.rotation.x = 0.1;
+        if (a.rightArm) a.rightArm.rotation.x = -0.1;
+        if (a.leftLeg) a.leftLeg.rotation.x = 0;
+        if (a.rightLeg) a.rightLeg.rotation.x = 0;
+        digTime = Math.max(0, digTime - delta);
+        if (digTime <= 0) {
+          digPhase = 'walk';
+          digRouteT = 0;
+          walkCycle = 0;
+        }
+      } else if (digPhase === 'walk') {
+        walkCycle += delta * 8;
+        digRouteT = Math.min(1, digRouteT + delta / digWalkDur);
+        const e = digRouteT * digRouteT * (3 - 2 * digRouteT);
+        agent.position.lerpVectors(digRoute[0], digRoute[1], e);
+        const dir = new THREE.Vector3().subVectors(digRoute[1], digRoute[0]);
+        if (dir.lengthSq() > 1e-6) agent.rotation.y = Math.atan2(dir.x, dir.z);
+        const sw = Math.sin(walkCycle) * 0.5;
+        a.leftLeg.rotation.x = sw; a.rightLeg.rotation.x = -sw;
+        a.leftArm.rotation.x = -sw * 0.6; a.rightArm.rotation.x = sw * 0.6;
+        if (digRouteT >= 1) {
+          a.leftLeg.rotation.x = 0; a.rightLeg.rotation.x = 0;
+          faceDigTarget();
+          digPhase = 'dig'; digTime = 0;
+        }
+      } else if (digPhase === 'dig') {
+        digTime += delta;
+        faceDigTarget();
+        a.rightArm.rotation.x = -0.4 - (Math.sin(digTime * 11) * 0.5 + 0.5) * 1.9;
+        a.leftArm.rotation.x = 0.12;
+        const prog = Math.min(1, digTime / DIG_DUR);
+        if (digBlock) {
+          updateDigTexture(prog);
+          digBlock.position.set(dcx, dcy, dcz);
+        }
+        if (digTime >= DIG_DUR) {
+          breakDigBlock();
+          a.rightArm.rotation.x = -0.18;
+          digPhase = 'done'; idleTime = 0;
+        }
+      } else {
+        idleAnimate(delta);
+      }
+      updateShards(delta);
+    }
+
+    function updateAgent(delta) {
+      if (!agent) return;
+      if (digMode) {
+        digUpdate(delta);
+        return;
+      }
+      if (!motionEnabled) {
+        idleAnimate(delta);
+        return;
+      }
+      if (playing && route.length > 1) {
+        const totalRouteTime = (route.length - 1) * segmentTime;
+        routeTime = Math.min(routeTime + delta, totalRouteTime);
+        const segment = Math.min(Math.floor(routeTime / segmentTime), route.length - 2);
+        const next = segment + 1;
+        const t = Math.min(1, (routeTime - segment * segmentTime) / segmentTime);
+        const stepUp = route[next].y > route[segment].y + 0.2;
+        const eased = stepUp
+          ? Math.max(0, Math.min(1, (t - 0.18) / 0.72)) ** 0.72
+          : t * t * (3 - 2 * t);
+        agent.position.lerpVectors(route[segment], route[next], eased);
+        agent.position.y += stepUp ? Math.sin(t * Math.PI) * 0.52 : Math.sin(t * Math.PI * 2) * 0.035;
+        const direction = new THREE.Vector3().subVectors(route[next], route[segment]);
+        if (direction.lengthSq() > 0) agent.rotation.y = Math.atan2(direction.x, direction.z);
+
+        const swing = Math.sin(routeTime * 12) * 0.48;
+        agent.userData.leftLeg.rotation.x = swing;
+        agent.userData.rightLeg.rotation.x = -swing;
+        agent.userData.leftArm.rotation.x = -swing * 0.85;
+        agent.userData.rightArm.rotation.x = swing * 0.85;
+        if (agent.userData.head) {
+          agent.userData.head.position.y = agent.userData.headBaseY + Math.sin(routeTime * 6) * 0.018;
+        }
+        if (routeTime >= totalRouteTime) {
+          playing = false;
+          toggleButton.innerHTML = '&#9654;';
+          agent.userData.leftLeg.rotation.x = 0;
+          agent.userData.rightLeg.rotation.x = 0;
+          agent.userData.leftArm.rotation.x = 0;
+          agent.userData.rightArm.rotation.x = 0;
+          if (agent.userData.head) agent.userData.head.position.y = agent.userData.headBaseY;
+        }
+      } else if (playing) {
+        routeTime += delta;
+        relaxRotation(agent.userData.leftLeg);
+        relaxRotation(agent.userData.rightLeg);
+        relaxRotation(agent.userData.leftArm);
+        relaxRotation(agent.userData.rightArm);
+        if (agent.userData.head) {
+          agent.userData.head.position.y = agent.userData.headBaseY + Math.sin(routeTime * 3) * 0.025;
+        }
+      }
+    }
+
+    async function init() {
+      const response = await fetch(mapUrl);
+      if (!response.ok) throw new Error(`Unable to load voxel map: ${response.status} ${response.statusText}`);
+      const map = await response.json();
+      blockTypes = map.blockTypes || {};
+      loadWorld(map.voxels || []);
+
+      let digInfo = null;
+      const digFollowups = [];
+      if (digMode) {
+        const ap = (map.agent && map.agent.position) ? map.agent.position : positionFromMap(map);
+        digInfo = planDig(ap.x, ap.z);
+        if (digInfo) {
+          world.delete(key(digInfo.tx, digInfo.ty, digInfo.tz));
+          // Pre-remove the follow-up dig blocks now (before the mesh is built) so
+          // digging them later never triggers a full world rebuild (which caused
+          // the zoom-out hitches). They are shown as standalone cubes until dug.
+          const lowerType = getBlock(digInfo.tx, digInfo.ty - 1, digInfo.tz);
+          const upperType = getBlock(digInfo.tx, digInfo.ty + 1, digInfo.tz);
+          if (lowerType) {
+            world.delete(key(digInfo.tx, digInfo.ty - 1, digInfo.tz));
+            digFollowups.push({ which: 'lower', x: digInfo.tx, y: digInfo.ty - 1, z: digInfo.tz, type: lowerType });
+          }
+          if (upperType) {
+            world.delete(key(digInfo.tx, digInfo.ty + 1, digInfo.tz));
+            digFollowups.push({ which: 'upper', x: digInfo.tx, y: digInfo.ty + 1, z: digInfo.tz, type: upperType });
+          }
+        }
+      }
+
+      await loadConfiguredTextures();
+      await loadTexture(skinUrl);
+      await loadTexture(crackTextureUrl).catch(() => null);
+
+      const worldMeshes = buildVoxelMeshes();
+      worldGroup = new THREE.Group();
+      worldGroup.add(worldMeshes);
+      scene.add(worldGroup);
+
+      route = pathFromMap(map);
+      agent = makeAgent(route[0] || positionFromMap(map));
+      scene.add(agent);
+
+      if (digMode && digInfo) {
+        setupDig(digInfo);
+        for (const t of digFollowups) {
+          const filler = makeDigCube(t.x, t.y, t.z, t.type);
+          scene.add(filler.cube);
+          multiFillers[t.which] = filler;
+        }
+      }
+
+      spawnPeerAgents(4);
+
+      configureCamera();
+
+      const sourceLabel = map.source?.agent ? `${map.source.agent} observation` : 'voxel observation';
+      const pathLabel = route.length > 1 ? `${route.length} path points` : 'no path in file';
+      caption.textContent = `${sourceLabel}: ${world.size} blocks, ${worldMeshes.userData.faceCount} visible faces, ${worldMeshes.userData.meshCount} materials, ${pathLabel}. Drag to rotate; scroll or pinch to zoom.`;
+    }
+
+    toggleButton.addEventListener('click', () => {
+      if (!playing && route.length > 1 && routeTime >= (route.length - 1) * segmentTime) {
+        routeTime = 0;
+        agent.position.copy(route[0]);
+      }
+      playing = !playing;
+      toggleButton.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+    });
+
+    resetButton.addEventListener('click', () => {
+      if (!homeCamera || !bounds) return;
+      camera.position.copy(homeCamera);
+      controls.target.set(
+        (bounds.minX + bounds.maxX + 1) / 2,
+        (bounds.minY + bounds.maxY + 1) / 2,
+        (bounds.minZ + bounds.maxZ + 1) / 2
+      );
+      controls.update();
+    });
+
+    window.addEventListener('resize', () => {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+      for (let i = 0; i < commArcs.length; i += 1) commArcs[i].line.material.resolution.set(width, height);
+    });
+
+    const bubbleAnchor = new THREE.Vector3();
+    let bubbleVisibleWanted = sayMessages.length > 0 && sayStartMode !== 'message' && sayStartDelay === 0;
+    let bubbleStarted = false;
+    let sayHideTimer = null;
+
+    function showSayMessage(index) {
+      if (!sayMessages.length || !bubble) return;
+      const next = Math.max(0, Math.min(sayMessages.length - 1, Number(index) || 0));
+      bubbleVisibleWanted = false;
+      if (sayHideTimer) { window.clearTimeout(sayHideTimer); sayHideTimer = null; }
+      window.setTimeout(() => {
+        bubble.textContent = sayMessages[next];
+        bubbleVisibleWanted = true;
+        if (next === sayMessages.length - 1 && window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'vibe:selfDrivenShown' }, '*');
+        }
+      }, 180);
+      // Hide the final message as the phone morph and short zoom complete.
+      if (next === sayMessages.length - 1) {
+        sayHideTimer = window.setTimeout(() => { bubbleVisibleWanted = false; }, 180 + 2000);
+      }
+    }
+
+    function updateBubble() {
+      if (!bubble || !sayMessages.length) return;
+      if (!agent) {
+        bubble.classList.remove('is-visible');
+        return;
+      }
+      bubbleAnchor.set(agent.position.x, agent.position.y + 2.05, agent.position.z);
+      bubbleAnchor.project(camera);
+      const behind = bubbleAnchor.z > 1;
+      bubble.style.left = ((bubbleAnchor.x * 0.5 + 0.5) * container.clientWidth) + 'px';
+      bubble.style.top = ((-bubbleAnchor.y * 0.5 + 0.5) * container.clientHeight) + 'px';
+      bubble.classList.toggle('is-visible', bubbleVisibleWanted && !behind);
+    }
+
+    function startBubbleMessages() {
+      if (bubbleStarted) return;
+      if (!sayMessages.length || !bubble) return;
+      bubbleStarted = true;
+      bubble.textContent = sayMessages[0];
+      bubbleVisibleWanted = true;
+      if (sayStartMode !== 'message' && sayMessages.length > 1) {
+        const holdMs = 3600;
+        const swapMs = 350;
+        for (let index = 1; index < sayMessages.length; index += 1) {
+          window.setTimeout(() => {
+            bubbleVisibleWanted = false;
+            window.setTimeout(() => {
+              bubble.textContent = sayMessages[index];
+              bubbleVisibleWanted = true;
+            }, swapMs);
+          }, holdMs * index);
+        }
+      }
+    }
+
+    function handleParentMessage(event) {
+      if (!event || !event.data) return;
+      if (event.data.type === 'vibe:startSay') {
+        startBubbleMessages();
+        return;
+      }
+      if (event.data.type === 'vibe:showSay') {
+        startBubbleMessages();
+        showSayMessage(event.data.index);
+        return;
+      }
+      if (event.data.type === 'vibe:startMulti') {
+        startMultiSequence();
+      }
+    }
+
+    if (sayStartMode === 'message') {
+      window.addEventListener('message', handleParentMessage);
+      // Fallback: start automatically if parent message is missed.
+      window.setTimeout(startBubbleMessages, 4500);
+    } else if (sayStartDelay > 0) {
+      window.setTimeout(startBubbleMessages, sayStartDelay);
+    } else {
+      startBubbleMessages();
+    }
+
+    if (sayStartMode !== 'message') {
+      window.addEventListener('message', handleParentMessage);
+    }
+
+    const clock = new THREE.Clock();
+
+    // --- peer agents + camera tour --------------------------------------
+    const peerPalettes = [
+      { shirt: '#c0653f', pants: '#3b4a63' },
+      { shirt: '#6f8f5a', pants: '#463a2c' },
+      { shirt: '#8a6d9c', pants: '#33404f' },
+      { shirt: '#c9a13b', pants: '#3f4a33' }
+    ];
+    const SHIRT_RECTS = [
+      [20, 16, 8, 4], [28, 16, 8, 4], [16, 20, 4, 12], [20, 20, 8, 12], [28, 20, 4, 12], [32, 20, 8, 12],
+      [44, 16, 4, 4], [48, 16, 4, 4], [40, 20, 4, 12], [44, 20, 4, 12], [48, 20, 4, 12], [52, 20, 4, 12]
+    ];
+    const PANTS_RECTS = [
+      [4, 16, 4, 4], [8, 16, 4, 4], [0, 20, 4, 12], [4, 20, 4, 12], [8, 20, 4, 12], [12, 20, 4, 12]
+    ];
+
+    function hexToRgb(hex) {
+      const v = parseInt(hex.replace('#', ''), 16);
+      return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+    }
+
+    function colorizeRegions(data, w, rects, hex) {
+      const [tr, tg, tb] = hexToRgb(hex);
+      for (const [rx, ry, rw, rh] of rects) {
+        for (let yy = ry; yy < ry + rh; yy += 1) {
+          for (let xx = rx; xx < rx + rw; xx += 1) {
+            const idx = (yy * w + xx) * 4;
+            if (data[idx + 3] === 0) continue;
+            const luma = (0.3 * data[idx] + 0.59 * data[idx + 1] + 0.11 * data[idx + 2]) / 255;
+            const f = 0.55 + luma * 0.9;
+            data[idx] = Math.min(255, Math.round(tr * f));
+            data[idx + 1] = Math.min(255, Math.round(tg * f));
+            data[idx + 2] = Math.min(255, Math.round(tb * f));
+          }
+        }
+      }
+    }
+
+    function createTintedSkin(baseImg, palette) {
+      const canvas = document.createElement('canvas');
+      canvas.width = baseImg.width;
+      canvas.height = baseImg.height;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(baseImg, 0, 0);
+      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      colorizeRegions(img.data, canvas.width, SHIRT_RECTS, palette.shirt);
+      colorizeRegions(img.data, canvas.width, PANTS_RECTS, palette.pants);
+      ctx.putImageData(img, 0, 0);
+      return configureTexture(new THREE.CanvasTexture(canvas));
+    }
+
+    const tintedSkinCache = {};
+    function getTintedSkin(baseImg, idx) {
+      if (!baseImg) return null;
+      if (tintedSkinCache[idx]) return tintedSkinCache[idx];
+      const tex = createTintedSkin(baseImg, peerPalettes[idx % peerPalettes.length]);
+      tintedSkinCache[idx] = tex;
+      return tex;
+    }
+
+    let terrainInfoCache = null;
+    function buildTerrainInfo() {
+      if (terrainInfoCache) return terrainInfoCache;
+      const ground = new Map();
+      const avoid = new Set();
+      for (const [k, type] of world) {
+        const [x, y, z] = k.split(',').map(Number);
+        const kk = x + ',' + z;
+        if (/tree|wood|birch|leaves/i.test(type)) { avoid.add(kk); continue; }
+        if (/water/i.test(type)) continue;
+        const cur = ground.get(kk);
+        if (cur === undefined || y > cur) ground.set(kk, y);
+      }
+      terrainInfoCache = { ground, avoid };
+      return terrainInfoCache;
+    }
+
+    function spawnPeerAgents(count) {
+      if (!agent || !bounds) return;
+      const base = textureCache.get(resolveAssetUrl(skinUrl));
+      const baseImg = base && base.image ? base.image : null;
+      const { ground, avoid } = buildTerrainInfo();
+      const cx = agent.position.x;
+      const cz = agent.position.z;
+      const cxi = Math.round(cx - 0.5);
+      const czi = Math.round(cz - 0.5);
+      const baseGY = (ground.get(cxi + ',' + czi) ?? (agent.position.y - 1)) + 1;
+      const margin = 4;
+      const minD = 16;
+      const maxD = 44;
+
+      // Collect every valid open-ground candidate, bucketed by angular quadrant.
+      const buckets = [[], [], [], []];
+      for (const [kk, blockY] of ground) {
+        if (avoid.has(kk)) continue;
+        const [ix, iz] = kk.split(',').map(Number);
+        if (ix <= bounds.minX + margin || ix >= bounds.maxX - margin ||
+            iz <= bounds.minZ + margin || iz >= bounds.maxZ - margin) continue;
+        const dx = (ix + 0.5) - cx;
+        const dz = (iz + 0.5) - cz;
+        const d = Math.hypot(dx, dz);
+        if (d < minD || d > maxD) continue;
+        const gy = blockY + 1;
+        if (gy < baseGY - 4) continue;
+        let ang = Math.atan2(dz, dx);
+        if (ang < 0) ang += Math.PI * 2;
+        const q = Math.floor(ang / (Math.PI / 2)) % 4;
+        buckets[q].push({ ix, iz, gy, d });
+      }
+
+      const viewH = new THREE.Vector2(AGENT_VIEW_DIR[0], AGENT_VIEW_DIR[2]);
+      if (viewH.lengthSq() > 1e-6) viewH.normalize();
+      const hasClearView = (ix, iz) => {
+        for (let k = 1; k <= 6; k += 1) {
+          const sx = ix + Math.round(viewH.x * k);
+          const sz = iz + Math.round(viewH.y * k);
+          if (avoid.has(sx + ',' + sz)) return false; // tree between agent and camera
+        }
+        return true;
+      };
+
+      // Prefer one spread-out candidate from each quadrant, with a clear line of
+      // sight from the camera side (not blocked by a tree).
+      const chosen = [];
+      for (let q = 0; q < 4 && chosen.length < count; q += 1) {
+        const b = buckets[q];
+        if (!b.length) continue;
+        b.sort((a, c) => a.d - c.d);
+        const start = Math.floor(b.length * 0.65);
+        let pick = null;
+        for (let off = 0; off < b.length && !pick; off += 1) {
+          for (const idx of [start + off, start - off]) {
+            if (idx >= 0 && idx < b.length && hasClearView(b[idx].ix, b[idx].iz)) { pick = b[idx]; break; }
+          }
+        }
+        chosen.push(pick || b[start]);
+      }
+      // Fill any remaining slots from the farthest well-separated candidates.
+      if (chosen.length < count) {
+        const rest = buckets.flat().filter((c) => !chosen.includes(c)).sort((a, c) => c.d - a.d);
+        for (const c of rest) {
+          if (chosen.length >= count) break;
+          if (!hasClearView(c.ix, c.iz)) continue;
+          if (chosen.every((o) => Math.hypot(o.ix - c.ix, o.iz - c.iz) > 8)) chosen.push(c);
+        }
+      }
+
+      for (let i = 0; i < chosen.length; i += 1) {
+        const c = chosen[i];
+        const placed = new THREE.Vector3(c.ix + 0.5, c.gy, c.iz + 0.5);
+        const texture = getTintedSkin(baseImg, i);
+        const peer = makeAgent(placed, texture);
+        peer.rotation.y = Math.atan2(agent.position.x - placed.x, agent.position.z - placed.z);
+        peer.userData.idlePhase = Math.random() * Math.PI * 2;
+        peerAgents.push(peer);
+        scene.add(peer);
+      }
+    }
+
+    function updatePeers(delta) {
+      for (const peer of peerAgents) {
+        const t = clock.elapsedTime + (peer.userData.idlePhase || 0);
+        const a = peer.userData;
+        if (a.leftArm) a.leftArm.rotation.x = 0.12 + Math.sin(t * 1.5) * 0.07;
+        if (a.rightArm) a.rightArm.rotation.x = -0.12 - Math.sin(t * 1.5) * 0.07;
+        if (a.head) a.head.rotation.y = Math.sin(t * 0.5) * 0.18;
+      }
+    }
+
+    function startTour() {
+      if (tourStarted || !peerAgents.length) return;
+      tourStarted = true;
+      followAgent = false;
+      const tourDist = 8;
+      tourWaypoints = [];
+      // Visit peers in angular order around the main agent so the camera sweeps
+      // the ring once and never crosses back over an already-visited agent.
+      const ordered = peerAgents.slice().sort((a, b) =>
+        Math.atan2(a.position.z - agent.position.z, a.position.x - agent.position.x) -
+        Math.atan2(b.position.z - agent.position.z, b.position.x - agent.position.x)
+      );
+      for (const peer of ordered) {
+        const focus = new THREE.Vector3(peer.position.x, peer.position.y + 1.0, peer.position.z);
+        tourWaypoints.push({ target: focus, cam: focus.clone().addScaledVector(camZoomDir, tourDist) });
+      }
+      tourIndex = 0;
+      prepareTourSegment();
+    }
+
+    function prepareTourSegment() {
+      const wp = tourWaypoints[tourIndex];
+      tourSegT = 0;
+      tourFromCam = camera.position.clone();
+      tourFromTarget = controls.target.clone();
+      tourSegDuration = Math.max(Number.EPSILON, tourFromCam.distanceTo(wp.cam) / tourCameraSpeed);
+    }
+
+    function updateTour(delta) {
+      if (!tourStarted || tourDone) return;
+      const wp = tourWaypoints[tourIndex];
+      if (tourHolding) {
+        camera.position.copy(wp.cam);
+        controls.target.copy(wp.target);
+        tourHoldT += delta;
+        if (tourHoldT >= 0.2) {
+          tourHolding = false;
+          tourHoldT = 0;
+          tourIndex += 1;
+          if (tourIndex >= tourWaypoints.length) {
+            // Last peer done: fold the return-to-main into the final zoom-out.
+            tourDone = true;
+            startFinalZoom();
+            return;
+          }
+          prepareTourSegment();
+        }
+        return;
+      }
+      tourSegT = Math.min(1, tourSegT + delta / tourSegDuration);
+      const e = tourSegT * tourSegT * (3 - 2 * tourSegT);
+      camera.position.lerpVectors(tourFromCam, wp.cam, e);
+      controls.target.lerpVectors(tourFromTarget, wp.target, e);
+      if (tourSegT >= 1) {
+        // Arrived at a peer: tell the parent a new player is joining, then hold.
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'vibe:tourFocus', index: tourIndex }, '*');
+        }
+        tourHolding = true;
+        tourHoldT = 0;
+      }
+    }
+
+    function startCameraZoom() {
+      camZoomDir.copy(camera.position).sub(controls.target);
+      camZoomFromDist = camZoomDir.length();
+      if (camZoomFromDist < 1e-4) return;
+      camZoomDir.multiplyScalar(1 / camZoomFromDist);
+      camZoomToDist = camZoomFromDist * (camZoomEndViewDist / camZoomStartViewDist);
+      controls.maxDistance = Math.max(controls.maxDistance, camZoomToDist + 5);
+      camZoomT = 0;
+      camZoomActive = true;
+    }
+
+    function updateCameraZoom(delta) {
+      if (!camZoomActive) return;
+      camZoomT = Math.min(1, camZoomT + delta / camZoomDur);
+      const e = camZoomT * camZoomT * (3 - 2 * camZoomT);
+      const dist = camZoomFromDist + (camZoomToDist - camZoomFromDist) * e;
+      camera.position.copy(controls.target).addScaledVector(camZoomDir, dist);
+      if (camZoomT >= 1) {
+        camZoomActive = false;
+        startTour();
+      }
+    }
+
+    function startFinalZoom() {
+      if (finalZoomStarted) return;
+      finalZoomStarted = true;
+      finalZoomFromCam = camera.position.clone();
+      finalZoomFromTarget = controls.target.clone();
+      finalZoomTarget = new THREE.Vector3(agent.position.x, agent.position.y + 1.0, agent.position.z);
+      const finalDist = camZoomFromDist * (finalZoomEndViewDist / camZoomStartViewDist);
+      finalZoomToCam = finalZoomTarget.clone().addScaledVector(camZoomDir, finalDist);
+      controls.maxDistance = Math.max(controls.maxDistance, finalDist + 5);
+      spawnExtraAgents(45);
+      buildCommArcs();
+      finalZoomT = 0;
+      finalZoomActive = true;
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'vibe:finalZoom' }, '*');
+      }
+    }
+
+    function collectGroundCandidates(minD, maxD) {
+      const { ground, avoid } = buildTerrainInfo();
+      const cx = agent.position.x;
+      const cz = agent.position.z;
+      const cxi = Math.round(cx - 0.5);
+      const czi = Math.round(cz - 0.5);
+      const baseGY = (ground.get(cxi + ',' + czi) ?? (agent.position.y - 1)) + 1;
+      const margin = 4;
+      const list = [];
+      for (const [kk, blockY] of ground) {
+        if (avoid.has(kk)) continue;
+        const [ix, iz] = kk.split(',').map(Number);
+        if (ix <= bounds.minX + margin || ix >= bounds.maxX - margin ||
+            iz <= bounds.minZ + margin || iz >= bounds.maxZ - margin) continue;
+        const d = Math.hypot((ix + 0.5) - cx, (iz + 0.5) - cz);
+        if (d < minD || d > maxD) continue;
+        if (blockY + 1 < baseGY - 6) continue;
+        list.push({ ix, iz, gy: blockY + 1 });
+      }
+      return list;
+    }
+
+    function spawnExtraAgents(count) {
+      if (!agent || !bounds) return;
+      const base = textureCache.get(resolveAssetUrl(skinUrl));
+      const baseImg = base && base.image ? base.image : null;
+      const cand = collectGroundCandidates(18, 80);
+      for (let i = cand.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = cand[i]; cand[i] = cand[j]; cand[j] = tmp;
+      }
+      const taken = peerAgents.map((p) => ({ ix: Math.round(p.position.x - 0.5), iz: Math.round(p.position.z - 0.5) }));
+      const minSep = 7;
+      let made = 0;
+      for (const c of cand) {
+        if (made >= count) break;
+        if (!taken.every((o) => Math.hypot(o.ix - c.ix, o.iz - c.iz) >= minSep)) continue;
+        const placed = new THREE.Vector3(c.ix + 0.5, c.gy, c.iz + 0.5);
+        const texture = getTintedSkin(baseImg, made);
+        const ex = makeAgent(placed, texture);
+        ex.rotation.y = Math.random() * Math.PI * 2;
+        ex.userData.idlePhase = Math.random() * Math.PI * 2;
+        ex.userData.fadeDelay = (made / Math.max(1, count)) * 0.55;
+        ex.scale.setScalar(0.001);
+        peerAgents.push(ex);
+        extraAgents.push(ex);
+        scene.add(ex);
+        taken.push({ ix: c.ix, iz: c.iz });
+        made += 1;
+      }
+    }
+
+    function buildCommArcs() {
+      if (commArcs.length || !peerAgents.length) return;
+      const nodes = [agent].concat(peerAgents);
+      const resW = container.clientWidth;
+      const resH = container.clientHeight;
+      const addLine = (positions, color, width) => {
+        const geo = new LineGeometry();
+        geo.setPositions(positions);
+        const mat = new LineMaterial({
+          color: color,
+          linewidth: width,
+          transparent: false,
+          opacity: 1,
+          dashed: true,
+          dashSize: 0.7,
+          gapSize: 1.4,
+          depthWrite: true
+        });
+        mat.resolution.set(resW, resH);
+        const line = new Line2(geo, mat);
+        line.visible = false;
+        line.computeLineDistances();
+        scene.add(line);
+        commArcs.push({ line: line, speed: 0.525 + Math.random() * 0.825 });
+      };
+      const addArc = (na, nb) => {
+        const a = na.position.clone(); a.y += 1.7;
+        const b = nb.position.clone(); b.y += 1.7;
+        const mid = a.clone().add(b).multiplyScalar(0.5);
+        mid.y += a.distanceTo(b) * 0.32;
+        const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+        const pts = curve.getPoints(40);
+        const positions = [];
+        for (const p of pts) positions.push(p.x, p.y, p.z);
+        addLine(positions, 0xfff1c7, 1);
+      };
+      // Connect each agent to its 2 nearest neighbours -> collaboration mesh.
+      const seen = new Set();
+      for (let i = 0; i < nodes.length; i += 1) {
+        const dists = [];
+        for (let j = 0; j < nodes.length; j += 1) {
+          if (i === j) continue;
+          dists.push([j, nodes[i].position.distanceToSquared(nodes[j].position)]);
+        }
+        dists.sort((x, y) => x[1] - y[1]);
+        const k = Math.min(3, dists.length);
+        for (let n = 0; n < k; n += 1) {
+          const j = dists[n][0];
+          const key = Math.min(i, j) + '-' + Math.max(i, j);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          addArc(nodes[i], nodes[j]);
+        }
+      }
+    }
+
+    function updateFinalZoom(delta) {
+      if (!finalZoomActive) return;
+      finalZoomT = Math.min(1, finalZoomT + delta / finalZoomDur);
+      const e = finalZoomT * finalZoomT * (3 - 2 * finalZoomT);
+      camera.position.lerpVectors(finalZoomFromCam, finalZoomToCam, e);
+      controls.target.lerpVectors(finalZoomFromTarget, finalZoomTarget, e);
+      for (let i = 0; i < commArcs.length; i += 1) commArcs[i].line.visible = finalZoomT > 0;
+      for (let i = 0; i < extraAgents.length; i += 1) {
+        const ex = extraAgents[i];
+        const t = Math.max(0, Math.min(1, (finalZoomT - ex.userData.fadeDelay) / 0.25));
+        const s = t * t * (3 - 2 * t);
+        ex.scale.setScalar(Math.max(0.001, s));
+      }
+      if (finalZoomT >= 1) {
+        finalZoomActive = false;
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'vibe:finalZoomComplete' }, '*');
+        }
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      updateAgent(delta);
+      updateMulti(delta);
+      if (followAgent && agent) {
+        const desiredX = agent.position.x;
+        const desiredZ = agent.position.z;
+        const deltaX = desiredX - controls.target.x;
+        const deltaZ = desiredZ - controls.target.z;
+        const deltaY = followTargetY - controls.target.y;
+        camera.position.x += deltaX;
+        camera.position.y += deltaY;
+        camera.position.z += deltaZ;
+        controls.target.set(desiredX, followTargetY, desiredZ);
+      }
+      updateCameraZoom(delta);
+      updateTour(delta);
+      updateFinalZoom(delta);
+      for (let i = 0; i < commArcs.length; i += 1) commArcs[i].line.material.dashOffset -= delta * commArcs[i].speed;
+      updatePeers(delta);
+      updateBubble();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    init().catch((error) => {
+      caption.textContent = error.message;
+      console.error(error);
+    });
+    animate();
+  </script>
+</body>
+</html>

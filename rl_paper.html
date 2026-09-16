@@ -1,0 +1,231 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://kit.fontawesome.com/d4f46cb594.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="academicons-1.8.6/css/academicons.min.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&display=swap"
+        rel="stylesheet">
+
+    <title>Interesting RL Papers</title>
+
+    <meta name="author" content="Wang Kaixin">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- Mathjax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<script type="text/javascript">
+    function prior_start(id) {
+        document.getElementById(id).style.opacity = "1";
+        var c = document.getElementById(id).parentNode.childNodes;
+        for (var i = 0; i < c.length; i++) {
+            if (c[i].className == "bottom-right") {
+                c[i].style.opacity = "0";
+                break;
+            }        
+        }
+    }
+
+    function prior_stop(id) {
+        document.getElementById(id).style.opacity = "0";
+        var c = document.getElementById(id).parentNode.childNodes;
+        for (var i = 0; i < c.length; i++) {
+            if (c[i].className == "bottom-right") {
+                c[i].style.opacity = "1";
+                break;
+            }        
+        }
+    }
+</script>
+
+<style>
+    .bottom-right {
+        position: absolute;
+        bottom: 30px;
+        right: 5px;
+        transition: opacity .5s ease-in-out;
+        -moz-transition: opacity .5s ease-in-out;
+        -webkit-transition: opacity .5s ease-in-out;
+    }
+
+</style>
+
+<body>
+    <table
+        style="width:100%;max-width:850px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+        <tbody>
+            <tr style="padding:0px">
+                <td style="padding:0px">
+                    <p style="float:right"><a href="index.html"><i class="fa fa-home"></i> Home</a></p>
+
+                    <h1 style="font-family: 'Titillium Web', sans-serif">
+                        Interesting RL Papers
+                    </h1>
+                    <hr>
+                    <table
+                        style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:0px;width:25%;vertical-align:middle" onmouseout="prior_stop('img1')"
+                                    onmouseover="prior_start('img1')">
+                                    <div class="one">
+                                        <div class="two" id='img1' style="opacity: 0;">
+                                            <img src='images/humanRL_random2.gif'
+                                                width="160" height="auto">
+                                            <div class="bottom-right" style="color:#FFFFFF;">Agent</div>
+                                        </div>
+                                        <img src='images/humanRL_main.gif' width="160"
+                                            height="auto">
+                                        <div class="bottom-right" style="color:#FFFFFF;">Human</div>
+                                    </div>
+                                </td>
+                                <td
+                                    style="padding:0px;width:75%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://rach0012.github.io/humanRL_website/" target="_blank"
+                                        rel="noopener noreferrer">
+                                        Investigating Human Priors for Playing Video Games
+                                    </a>
+                                    <br>
+                                    <span style="color:#D7D7D7;">
+                                        Rachit Dubey, Pulkit Agrawal, Deepak Pathak, Thomas L. Griffiths, Alexei A.
+                                        Efros
+                                    </span>
+                                    <br>
+                                    <em style="color:#E4E4E4;">ICML 2018</em>
+                                    <br>
+                                    This game placed us in the shoes of reinforcement learning (RL) agents that start
+                                    off
+                                    without the immense prior knowledge that humans possess.
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:25%;vertical-align:middle">
+                                    <img src='images/2102.13089.png' width="160" height="auto">
+                                </td>
+                                <td
+                                    style="padding:0px;width:75%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/2102.13089" target="_blank"
+                                        rel="noopener noreferrer">
+                                        On The Effect of Auxiliary Tasks on Representation Dynamics
+                                    </a>
+                                    <br>
+                                    <span style="color:#D7D7D7;">
+                                        Clare Lyle, Mark Rowland, Georg Ostrovski, Will Dabney
+                                    </span>
+                                    <br>
+                                    <em style="color:#E4E4E4;">AISTATS 2021</em>
+                                    <br>
+                                    Even in an environment with no reward signal at all, an agent performing TD learning
+                                    still picks up
+                                    information about the transition structure of the environment within its value
+                                    function.
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:25%;vertical-align:middle" onmouseout="prior_stop('img2')"
+                                    onmouseover="prior_start('img2')">
+                                    <div class="one">
+                                        <div class="two" id='img2' style="opacity: 0;">
+                                            <img src='https://ctallec.github.io/continuous-rl/vids/ddpg_high_best.gif'
+                                                width="160" height="auto">
+                                            <div class="bottom-right">1000 FPS</div>
+                                        </div>
+                                        <img src='https://ctallec.github.io/continuous-rl/vids/ddpg_low_best.gif'
+                                            width="160" height="auto">
+                                        <div class="bottom-right">50 FPS</div>
+                                    </div>
+                                </td>
+                                <td
+                                    style="padding:0px;width:75%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://ctallec.github.io/continuous-rl/" target="_blank"
+                                        rel="noopener noreferrer">
+                                        Making Deep Q-learning methods robust to time discretization
+                                    </a>
+                                    <br>
+                                    <span style="color:#D7D7D7;">
+                                        Corentin Tallec, Léonard Blier, Yann Ollivier
+                                    </span>
+                                    <br>
+                                    <em style="color:#E4E4E4;">ICML 2019</em>
+                                    <br>
+                                    Standard approaches based on estimation of state-action values, such as DQN<sup id="footnote_1">1</sup>
+                                    and DDPG<sup id="footnote_2">2</sup> are not at all robust to changes in time discretization
+                                    (i.e. increasing FPS from 50 to 1000).
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0px;width:25%;vertical-align:middle">
+                                    <img src='images/1901.11524.png' width="160" height="auto">
+                                </td>
+                                <td
+                                    style="padding:0px;width:75%;vertical-align:middle;font-family: 'Titillium Web', sans-serif;">
+                                    <a href="https://arxiv.org/abs/1901.11524" target="_blank"
+                                        rel="noopener noreferrer">
+                                        The Value Function Polytope in Reinforcement Learning
+                                    </a>
+                                    <br>
+                                    <span style="color:#D7D7D7;">
+                                        Robert Dadashi, Adrien Ali Taïga, Nicolas Le Roux, Dale Schuurmans, Marc G. Bellemare
+                                    </span>
+                                    <br>
+                                    <em style="color:#E4E4E4;">ICML 2019</em>
+                                    <br>
+                                    We characterized the shape of value functions and established its surprising geometric nature:
+                                    a possibly non-convex polytope.
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+
+    <script>
+        tippy('#footnote_1', {
+            content: "<a href='https://www.nature.com/articles/nature14236' target='_blank' rel='noopener noreferrer'>"
+                + "Human-level control through deep reinforcement learning</a><br>"
+                + "Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Andrei A. Rusu, Joel Veness, Marc G. Bellemare, "
+                + "Alex Graves, Martin Riedmiller, Andreas K. Fidjeland, Georg Ostrovski, Stig Petersen, Charles Beattie, "
+                + "Amir Sadik, Ioannis Antonoglou, Helen King, Dharshan Kumaran, Daan Wierstra, Shane Legg, Demis Hassabis<br>"
+                + "<em>Nature</em>",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "500px"
+        });
+
+        tippy('#footnote_2', {
+            content: "<a href='https://arxiv.org/abs/1509.02971' target='_blank' rel='noopener noreferrer'>"
+                + "Continuous control with deep reinforcement learning</a><br>"
+                + "Timothy P. Lillicrap, Jonathan J. Hunt, Alexander Pritzel, Nicolas Heess, "
+                + "Tom Erez, Yuval Tassa, David Silver, Daan Wierstra<br>"
+                + "<em>ICLR 2016</em>",
+            interactive: true,
+            allowHTML: true,
+            theme: 'portal',
+            arrow: false,
+            maxWidth: "500px"
+        });
+    </script>
+
+</body>
+
+</html>
