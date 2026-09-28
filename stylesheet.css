@@ -39,6 +39,10 @@ strong {
   font-size: 15px;
 }
 
+.author {
+  white-space: nowrap;
+}
+
 heading {
   font-family: 'Titillium Web', sans-serif;
   font-weight: 300;
